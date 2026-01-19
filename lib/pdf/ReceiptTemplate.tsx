@@ -363,7 +363,7 @@ export function ReceiptTemplate({ review, logoUrl }: ReceiptTemplateProps) {
 
   return (
     <Document>
-      <Page size={{ width: 300, height: 1050 }} style={styles.page}>
+      <Page size={{ width: 300, height: "auto" }} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           {logoUrl && (
