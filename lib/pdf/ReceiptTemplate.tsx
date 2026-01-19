@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
 
 interface ReceiptTemplateProps {
   review: Review;
-  baseUrl?: string; // Base URL for loading static assets like the logo
+  logoUrl?: string; // Direct URL to the Bodega Research logo
 }
 
 // Score bar component
@@ -343,7 +343,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
   );
 }
 
-export function ReceiptTemplate({ review, baseUrl }: ReceiptTemplateProps) {
+export function ReceiptTemplate({ review, logoUrl }: ReceiptTemplateProps) {
   const receipt = review.ai_data?.publicReceipt;
   const marketIntel = review.ai_data?.marketIntelligence;
   const bodegaTake = review.raw_notes?.my_recommendations;
@@ -360,9 +360,6 @@ export function ReceiptTemplate({ review, baseUrl }: ReceiptTemplateProps) {
 
   // Check if we have content for page 2 (Bodega's Take or Market Trends)
   const hasPage2Content = bodegaTake || (marketIntel?.marketTrends && marketIntel.marketTrends.length > 0);
-
-  // Construct logo URL if baseUrl is provided
-  const logoUrl = baseUrl ? `${baseUrl}/images/bodega-logo.png` : null;
 
   return (
     <Document>

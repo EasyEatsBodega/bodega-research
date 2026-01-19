@@ -6,17 +6,26 @@ import { ReceiptTemplate } from "@/lib/pdf/ReceiptTemplate";
 import { ReportTemplate } from "@/lib/pdf/ReportTemplate";
 import type { Review } from "@/types";
 
-// Get the base URL for loading static assets
-function getBaseUrl(): string {
-  // In production, use NEXT_PUBLIC_SITE_URL or VERCEL_URL
+// Get the logo URL for the receipt PDF
+// Supports: direct URL via env var, or constructed from site URL
+function getLogoUrl(): string | null {
+  // Option 1: Direct logo URL (e.g., from Supabase Storage)
+  // Set BODEGA_LOGO_URL to a publicly accessible image URL
+  if (process.env.BODEGA_LOGO_URL) {
+    return process.env.BODEGA_LOGO_URL;
+  }
+
+  // Option 2: Use site URL to construct path to public folder
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
+    return `${process.env.NEXT_PUBLIC_SITE_URL}/images/bodega-logo.png`;
   }
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+    return `https://${process.env.VERCEL_URL}/images/bodega-logo.png`;
   }
-  // Fallback for local development
-  return "http://localhost:3000";
+
+  // Return null for local development - logo will be skipped
+  // since localhost isn't accessible during PDF server-side rendering
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -72,12 +81,12 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]/g, "-")
       .replace(/-+/g, "-");
     const timestamp = Date.now();
-    const baseUrl = getBaseUrl();
+    const logoUrl = getLogoUrl();
 
     try {
       if (type === "infographic") {
         pdfBuffer = await renderToBuffer(
-          ReceiptTemplate({ review: review as Review, baseUrl })
+          ReceiptTemplate({ review: review as Review, logoUrl: logoUrl || undefined })
         );
         fileName = `${sanitizedName}-receipt-${timestamp}.pdf`;
         bucketName = "public-infographics";
