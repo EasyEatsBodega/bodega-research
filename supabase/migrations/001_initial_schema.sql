@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS leads (
   name TEXT NOT NULL,
   project_link TEXT,
   email TEXT NOT NULL,
+  telegram_username TEXT,
+  preferred_contact TEXT DEFAULT 'email',
+  preferred_contact_other TEXT,
   message TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

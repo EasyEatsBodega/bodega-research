@@ -17,6 +17,9 @@ interface LeadNotificationData {
   name: string;
   email: string;
   projectLink?: string;
+  telegramUsername?: string;
+  preferredContact?: string;
+  preferredContactOther?: string;
   message?: string;
 }
 
@@ -38,7 +41,7 @@ export async function sendLeadNotification(lead: LeadNotificationData) {
     const { data, error } = await resend.emails.send({
       from: "Bodega Research <notifications@resend.dev>", // Use your verified domain in production
       to: adminEmail,
-      subject: `New Wholesale Inquiry: ${lead.name}`,
+      subject: `New Review Inquiry: ${lead.name}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -51,7 +54,7 @@ export async function sendLeadNotification(lead: LeadNotificationData) {
             <!-- Header -->
             <div style="background: linear-gradient(90deg, #F0A202, #F18805); padding: 20px; text-align: center;">
               <h1 style="margin: 0; color: #0A0A0A; font-size: 18px; letter-spacing: 2px;">BODEGA RESEARCH</h1>
-              <p style="margin: 5px 0 0; color: #0A0A0A; font-size: 12px;">NEW WHOLESALE INQUIRY</p>
+              <p style="margin: 5px 0 0; color: #0A0A0A; font-size: 12px;">NEW REVIEW INQUIRY</p>
             </div>
 
             <!-- Content -->
@@ -64,6 +67,30 @@ export async function sendLeadNotification(lead: LeadNotificationData) {
               <div style="margin-bottom: 20px;">
                 <p style="color: #A3A3A3; font-size: 10px; margin: 0 0 5px; text-transform: uppercase; letter-spacing: 1px;">Email</p>
                 <a href="mailto:${lead.email}" style="color: #F0A202; font-size: 14px; text-decoration: none;">${lead.email}</a>
+              </div>
+
+              ${
+                lead.telegramUsername
+                  ? `
+              <div style="margin-bottom: 20px;">
+                <p style="color: #A3A3A3; font-size: 10px; margin: 0 0 5px; text-transform: uppercase; letter-spacing: 1px;">Telegram</p>
+                <p style="color: #FAFAFA; font-size: 14px; margin: 0;">${lead.telegramUsername}</p>
+              </div>
+              `
+                  : ""
+              }
+
+              <div style="margin-bottom: 20px;">
+                <p style="color: #A3A3A3; font-size: 10px; margin: 0 0 5px; text-transform: uppercase; letter-spacing: 1px;">Preferred Contact</p>
+                <p style="color: #FAFAFA; font-size: 14px; margin: 0;">${
+                  lead.preferredContact === "other"
+                    ? lead.preferredContactOther || "Other"
+                    : lead.preferredContact === "x_dms"
+                      ? "X DMs"
+                      : lead.preferredContact === "telegram"
+                        ? "Telegram"
+                        : "Email"
+                }</p>
               </div>
 
               ${
@@ -103,10 +130,20 @@ export async function sendLeadNotification(lead: LeadNotificationData) {
         </html>
       `,
       text: `
-New Wholesale Inquiry at Bodega Research
+New Review Inquiry at Bodega Research
 
 From: ${lead.name}
 Email: ${lead.email}
+${lead.telegramUsername ? `Telegram: ${lead.telegramUsername}` : ""}
+Preferred Contact: ${
+        lead.preferredContact === "other"
+          ? lead.preferredContactOther || "Other"
+          : lead.preferredContact === "x_dms"
+            ? "X DMs"
+            : lead.preferredContact === "telegram"
+              ? "Telegram"
+              : "Email"
+      }
 ${lead.projectLink ? `Project Link: ${lead.projectLink}` : ""}
 ${lead.message ? `Message: ${lead.message}` : ""}
 

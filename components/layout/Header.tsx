@@ -42,7 +42,7 @@ export function Header() {
               href="#inquiry"
               className="font-mono text-sm text-gray-400 hover:text-foreground transition-colors"
             >
-              WHOLESALE
+              INQUIRY
             </Link>
             <Link
               href="/admin/login"
@@ -85,7 +85,7 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
               className="block font-mono text-sm text-gray-400 hover:text-foreground py-2"
             >
-              WHOLESALE
+              INQUIRY
             </Link>
             <Link
               href="/admin/login"

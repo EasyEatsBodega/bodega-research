@@ -265,7 +265,7 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                 <div className="flex items-center gap-3 mb-6">
                   <Users className="w-6 h-6 text-bodega-gold" />
                   <h1 className="font-mono font-bold text-2xl text-foreground">
-                    Wholesale Leads
+                    Review Leads
                   </h1>
                 </div>
                 <div className="space-y-4">
@@ -287,6 +287,23 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                           {new Date(lead.created_at).toLocaleDateString()}
                         </span>
                       </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {lead.telegram_username && (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-bodega-navy/30 text-gray-300">
+                            TG: {lead.telegram_username}
+                          </span>
+                        )}
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-bodega-gold/20 text-bodega-gold">
+                          Contact via:{" "}
+                          {lead.preferred_contact === "other"
+                            ? lead.preferred_contact_other || "Other"
+                            : lead.preferred_contact === "x_dms"
+                              ? "X DMs"
+                              : lead.preferred_contact === "telegram"
+                                ? "Telegram"
+                                : "Email"}
+                        </span>
+                      </div>
                       {lead.project_link && (
                         <a
                           href={lead.project_link}
@@ -298,7 +315,7 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                         </a>
                       )}
                       {lead.message && (
-                        <p className="text-sm text-gray-400 font-mono">
+                        <p className="text-sm text-gray-400 font-mono mt-3 p-3 bg-surface-tertiary rounded-lg border-l-2 border-bodega-gold">
                           {lead.message}
                         </p>
                       )}

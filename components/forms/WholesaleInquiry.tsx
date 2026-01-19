@@ -2,16 +2,26 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Package, CheckCircle2 } from "lucide-react";
+import { Send, Package, CheckCircle2, ChevronDown } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import type { LeadFormData } from "@/types";
+import type { LeadFormData, ContactMethod } from "@/types";
+
+const CONTACT_OPTIONS: { value: ContactMethod; label: string }[] = [
+  { value: "email", label: "Email" },
+  { value: "x_dms", label: "X DMs" },
+  { value: "telegram", label: "Telegram" },
+  { value: "other", label: "Other" },
+];
 
 export function WholesaleInquiry() {
   const [formData, setFormData] = useState<LeadFormData>({
     name: "",
     projectLink: "",
     email: "",
+    telegramUsername: "",
+    preferredContact: "email",
+    preferredContactOther: "",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +45,15 @@ export function WholesaleInquiry() {
       }
 
       setIsSubmitted(true);
-      setFormData({ name: "", projectLink: "", email: "", message: "" });
+      setFormData({
+        name: "",
+        projectLink: "",
+        email: "",
+        telegramUsername: "",
+        preferredContact: "email",
+        preferredContactOther: "",
+        message: "",
+      });
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -59,7 +77,7 @@ export function WholesaleInquiry() {
           <CheckCircle2 className="w-8 h-8 text-surface-primary" />
         </motion.div>
         <h3 className="font-mono font-bold text-2xl text-foreground mb-2">
-          ORDER RECEIVED
+          REQUEST RECEIVED
         </h3>
         <p className="text-gray-400 font-mono max-w-md mx-auto">
           Thanks for your interest! We&apos;ll review your project and get back
@@ -89,7 +107,7 @@ export function WholesaleInquiry() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Package className="w-8 h-8 text-bodega-gold" />
             <h2 className="font-mono font-bold text-3xl text-foreground">
-              WHOLESALE INQUIRY
+              REVIEW INQUIRY
             </h2>
           </div>
           <p className="text-gray-400 font-mono max-w-lg mx-auto">
@@ -130,6 +148,67 @@ export function WholesaleInquiry() {
               />
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Telegram Username"
+                placeholder="@username"
+                value={formData.telegramUsername}
+                onChange={(e) =>
+                  setFormData({ ...formData, telegramUsername: e.target.value })
+                }
+                hint="Optional"
+              />
+              <div className="space-y-2">
+                <label className="block text-sm font-mono text-gray-400 uppercase tracking-wider">
+                  Preferred Contact Method
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.preferredContact}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        preferredContact: e.target.value as ContactMethod,
+                        preferredContactOther:
+                          e.target.value !== "other"
+                            ? ""
+                            : formData.preferredContactOther,
+                      })
+                    }
+                    className="w-full bg-surface-tertiary border border-border rounded-lg px-4 py-3 font-mono text-foreground appearance-none cursor-pointer hover:border-bodega-gold/50 focus:border-bodega-gold focus:outline-none focus:ring-1 focus:ring-bodega-gold transition-colors"
+                  >
+                    {CONTACT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {formData.preferredContact === "other" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <Input
+                  label="Other Contact Method"
+                  placeholder="Discord, Signal, etc."
+                  value={formData.preferredContactOther}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      preferredContactOther: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </motion.div>
+            )}
+
             <Input
               label="Project Link"
               placeholder="https://yourproject.xyz"
@@ -163,7 +242,7 @@ export function WholesaleInquiry() {
               isLoading={isSubmitting}
               leftIcon={<Send className="w-4 h-4" />}
             >
-              REQUEST RESTOCK
+              REQUEST REVIEW
             </Button>
           </div>
         </motion.form>

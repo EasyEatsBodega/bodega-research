@@ -16,6 +16,9 @@ export interface Lead {
   name: string;
   project_link: string | null;
   email: string;
+  telegram_username: string | null;
+  preferred_contact: string | null;
+  preferred_contact_other: string | null;
   message: string | null;
   created_at: string;
 }
@@ -55,10 +58,15 @@ export interface ReviewFormData {
   aisle4_sentiment: string;
 }
 
+export type ContactMethod = "x_dms" | "email" | "telegram" | "other";
+
 export interface LeadFormData {
   name: string;
   projectLink: string;
   email: string;
+  telegramUsername?: string;
+  preferredContact: ContactMethod;
+  preferredContactOther?: string;
   message: string;
 }
 

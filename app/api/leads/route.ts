@@ -5,7 +5,15 @@ import { sendLeadNotification } from "@/lib/resend";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, projectLink, email, message } = body;
+    const {
+      name,
+      projectLink,
+      email,
+      telegramUsername,
+      preferredContact,
+      preferredContactOther,
+      message,
+    } = body;
 
     // Validate required fields
     if (!name || !email) {
@@ -24,6 +32,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate preferredContact if "other" is selected
+    if (preferredContact === "other" && !preferredContactOther) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Please specify your preferred contact method",
+        },
+        { status: 400 }
+      );
+    }
+
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
@@ -32,6 +51,9 @@ export async function POST(request: Request) {
         name,
         project_link: projectLink || null,
         email,
+        telegram_username: telegramUsername || null,
+        preferred_contact: preferredContact || "email",
+        preferred_contact_other: preferredContactOther || null,
         message: message || null,
       })
       .select()
@@ -50,6 +72,9 @@ export async function POST(request: Request) {
       name,
       email,
       projectLink: projectLink || undefined,
+      telegramUsername: telegramUsername || undefined,
+      preferredContact: preferredContact || "email",
+      preferredContactOther: preferredContactOther || undefined,
       message: message || undefined,
     }).catch((err) => {
       console.error("Failed to send notification:", err);

@@ -194,3 +194,203 @@ body {
                 linear-gradient(135deg, var(--bodega-gold), var(--bodega-orange)) border-box;
   }
 }
+
+/* Neon sign effect */
+@keyframes neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px var(--bodega-gold),
+      0 0 80px var(--bodega-gold),
+      0 0 90px var(--bodega-gold),
+      0 0 100px var(--bodega-gold),
+      0 0 150px var(--bodega-gold);
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    text-shadow: none;
+    opacity: 0.8;
+  }
+}
+
+@keyframes neon-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px var(--bodega-gold),
+      0 0 80px var(--bodega-gold);
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 2px #fff,
+      0 0 8px #fff,
+      0 0 15px #fff,
+      0 0 30px var(--bodega-gold),
+      0 0 60px var(--bodega-gold);
+    opacity: 0.95;
+  }
+}
+
+@keyframes subtle-buzz {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(0.5px, 0); }
+  50% { transform: translate(-0.5px, 0.5px); }
+  75% { transform: translate(0.5px, -0.5px); }
+}
+
+.neon-text {
+  animation: neon-glow 2s ease-in-out infinite;
+}
+
+.neon-text-flicker {
+  animation: neon-flicker 4s infinite alternate;
+}
+
+.neon-sign {
+  position: relative;
+  padding: 1rem 2rem;
+  border: 3px solid var(--bodega-gold);
+  border-radius: 8px;
+  background: rgba(240, 162, 2, 0.05);
+  box-shadow:
+    0 0 10px rgba(240, 162, 2, 0.3),
+    inset 0 0 10px rgba(240, 162, 2, 0.1);
+}
+
+.neon-box {
+  box-shadow:
+    0 0 5px var(--bodega-gold),
+    0 0 10px var(--bodega-gold),
+    0 0 20px rgba(240, 162, 2, 0.5),
+    inset 0 0 10px rgba(240, 162, 2, 0.1);
+}
+
+/* Open sign animation */
+@keyframes open-sign-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 5px #22c55e,
+      0 0 10px #22c55e,
+      0 0 20px #22c55e,
+      0 0 40px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 2px #22c55e,
+      0 0 5px #22c55e,
+      0 0 10px #22c55e,
+      0 0 20px rgba(34, 197, 94, 0.2);
+  }
+}
+
+.open-sign {
+  animation: open-sign-pulse 2s ease-in-out infinite;
+  border: 2px solid #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+/* Aisle sign styling */
+.aisle-sign {
+  position: relative;
+  background: linear-gradient(180deg, var(--bodega-gold) 0%, var(--bodega-orange) 100%);
+  color: #0A0A0A;
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+}
+
+/* Shelf divider */
+.shelf-divider {
+  position: relative;
+  height: 4px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #333 10%,
+    #444 50%,
+    #333 90%,
+    transparent 100%
+  );
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.shelf-divider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+/* Window display effect */
+.window-display {
+  position: relative;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.8), rgba(10, 10, 10, 0.95));
+  border: 2px solid #333;
+  border-radius: 12px;
+}
+
+.window-display::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Corner sticker */
+.corner-sticker {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--bodega-coral);
+  color: white;
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: bold;
+  transform: rotate(15deg);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Barcode styling */
+.barcode {
+  display: flex;
+  gap: 1px;
+  height: 40px;
+  align-items: flex-end;
+}
+
+.barcode span {
+  background: #333;
+  width: 2px;
+}
+
+/* Gritty texture overlay */
+.gritty-overlay {
+  position: relative;
+}
+
+.gritty-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
