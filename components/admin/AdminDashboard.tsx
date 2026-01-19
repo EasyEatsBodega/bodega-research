@@ -15,6 +15,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { POSForm } from "./POSForm";
+import { ReviewDetailModal } from "./ReviewDetailModal";
 import type { Review, Lead } from "@/types";
 import type { User } from "@supabase/supabase-js";
 
@@ -29,6 +30,7 @@ type TabType = "new-review" | "inventory" | "leads" | "analytics";
 export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("new-review");
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -206,7 +208,8 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                         {reviews.map((review) => (
                           <tr
                             key={review.id}
-                            className="border-b border-border hover:bg-surface-tertiary transition-colors"
+                            onClick={() => setSelectedReview(review)}
+                            className="border-b border-border hover:bg-surface-tertiary transition-colors cursor-pointer"
                           >
                             <td className="p-4 font-mono text-foreground">
                               {review.project_name}
@@ -356,6 +359,13 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
           </main>
         </div>
       </div>
+
+      {/* Review Detail Modal */}
+      <ReviewDetailModal
+        review={selectedReview}
+        isOpen={!!selectedReview}
+        onClose={() => setSelectedReview(null)}
+      />
     </div>
   );
 }
