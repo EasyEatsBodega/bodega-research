@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 import {
   Document,
   Page,
@@ -42,6 +43,13 @@ const styles = StyleSheet.create({
   header: {
     textAlign: "center",
     marginBottom: 15,
+    alignItems: "center",
+  },
+  bodegaLogo: {
+    width: 60,
+    height: 60,
+    marginBottom: 10,
+    objectFit: "contain",
   },
   title: {
     fontSize: 16,
@@ -311,6 +319,7 @@ const styles = StyleSheet.create({
 
 interface ReceiptTemplateProps {
   review: Review;
+  baseUrl?: string; // Base URL for loading static assets like the logo
 }
 
 // Score bar component
@@ -334,7 +343,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
   );
 }
 
-export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
+export function ReceiptTemplate({ review, baseUrl }: ReceiptTemplateProps) {
   const receipt = review.ai_data?.publicReceipt;
   const marketIntel = review.ai_data?.marketIntelligence;
   const bodegaTake = review.raw_notes?.my_recommendations;
@@ -352,11 +361,20 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
   // Check if we have content for page 2 (Bodega's Take or Market Trends)
   const hasPage2Content = bodegaTake || (marketIntel?.marketTrends && marketIntel.marketTrends.length > 0);
 
+  // Construct logo URL if baseUrl is provided
+  const logoUrl = baseUrl ? `${baseUrl}/images/bodega-logo.png` : null;
+
   return (
     <Document>
       <Page size={{ width: 300, height: 1050 }} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
+          {logoUrl && (
+            <Image
+              src={logoUrl}
+              style={styles.bodegaLogo}
+            />
+          )}
           <Text style={styles.title}>BODEGA RESEARCH</Text>
           <Text style={styles.subtitle}>*** WEB3 DUE DILIGENCE ***</Text>
           <Text style={styles.date}>{date}</Text>

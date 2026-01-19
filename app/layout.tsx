@@ -19,17 +19,24 @@ export const metadata: Metadata = {
     "Professional Web3 project analysis and due diligence. Get the alpha before you ape.",
   keywords: ["web3", "crypto", "due diligence", "research", "defi", "nft"],
   authors: [{ name: "Bodega Research" }],
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   openGraph: {
     title: "Bodega Research | Web3 Due Diligence",
     description:
       "Professional Web3 project analysis and due diligence. Get the alpha before you ape.",
     type: "website",
+    images: ["/images/bodega-logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Bodega Research | Web3 Due Diligence",
     description:
       "Professional Web3 project analysis and due diligence. Get the alpha before you ape.",
+    images: ["/images/bodega-logo.png"],
   },
 };
 

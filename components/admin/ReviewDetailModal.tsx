@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,7 +21,6 @@ import {
   Share2,
   Check,
   Loader2,
-  Camera,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -87,11 +86,9 @@ export function ReviewDetailModal({
   onClose,
 }: ReviewDetailModalProps) {
   const router = useRouter();
-  const contentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isExportingImage, setIsExportingImage] = useState(false);
 
   if (!review) return null;
 

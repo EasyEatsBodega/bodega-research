@@ -6,6 +6,19 @@ import { ReceiptTemplate } from "@/lib/pdf/ReceiptTemplate";
 import { ReportTemplate } from "@/lib/pdf/ReportTemplate";
 import type { Review } from "@/types";
 
+// Get the base URL for loading static assets
+function getBaseUrl(): string {
+  // In production, use NEXT_PUBLIC_SITE_URL or VERCEL_URL
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  // Fallback for local development
+  return "http://localhost:3000";
+}
+
 export async function POST(request: Request) {
   try {
     // Verify user is authenticated
@@ -59,11 +72,12 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]/g, "-")
       .replace(/-+/g, "-");
     const timestamp = Date.now();
+    const baseUrl = getBaseUrl();
 
     try {
       if (type === "infographic") {
         pdfBuffer = await renderToBuffer(
-          ReceiptTemplate({ review: review as Review })
+          ReceiptTemplate({ review: review as Review, baseUrl })
         );
         fileName = `${sanitizedName}-receipt-${timestamp}.pdf`;
         bucketName = "public-infographics";
