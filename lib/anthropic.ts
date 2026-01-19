@@ -1,9 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { RawNotes, AIAnalysis, PublicReceipt } from "@/types";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function getAnthropicClient() {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("ANTHROPIC_API_KEY environment variable is not set");
+  }
+  return new Anthropic({ apiKey });
+}
 
 const SYSTEM_PROMPT = `You are a Senior Web3 Analyst at Bodega Research, a professional due diligence platform. Your job is to analyze raw analyst notes about Web3 projects and transform them into structured, actionable insights.
 
@@ -72,6 +76,7 @@ ${rawNotes.aisle4_sentiment}
 
 Generate the Public Receipt and Private Report based on these notes.`;
 
+  const anthropic = getAnthropicClient();
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4096,
