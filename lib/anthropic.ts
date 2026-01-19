@@ -42,16 +42,22 @@ A professional 500-word consulting document that provides a deep-dive analysis. 
 - Recommended next steps
 
 OUTPUT 3 - MARKET INTELLIGENCE:
-Research and provide market data about the sector/space this project operates in:
+The analyst has provided the following market context that you MUST use exactly as given:
+- Sector: (provided by analyst)
+- Key Competitors: (provided by analyst)
+- Market Maturity: (provided by analyst)
+- Entry Barrier: (provided by analyst)
+
+Based on the sector and your knowledge of the Web3 ecosystem, you need to generate:
 {
-  "sector": "DeFi Lending", // The specific Web3 sector (e.g., "DeFi", "NFT Marketplace", "Gaming/GameFi", "Layer 2", "DAO Tooling", "Social", etc.)
-  "tam": "$50B", // Total Addressable Market estimate for this sector
-  "tamGrowthRate": "25% YoY", // Year-over-year growth rate of the market
-  "userGrowthPotential": "High", // One of: "Low", "Medium", "High", "Very High"
-  "keyCompetitors": ["Aave", "Compound", "MakerDAO"], // 3-5 main competitors in this space
-  "marketTrends": ["Trend 1", "Trend 2", "Trend 3"], // 3 key trends affecting this market
-  "marketMaturity": "Growing", // One of: "Emerging", "Growing", "Mature", "Declining"
-  "entryBarrier": "Medium" // One of: "Low", "Medium", "High"
+  "sector": "<USE THE EXACT SECTOR PROVIDED BY ANALYST>",
+  "tam": "$50B", // Total Addressable Market estimate for this sector based on your knowledge
+  "tamGrowthRate": "25% YoY", // Year-over-year growth rate estimate
+  "userGrowthPotential": "High", // One of: "Low", "Medium", "High", "Very High" - estimate based on sector
+  "keyCompetitors": ["<USE EXACT COMPETITORS FROM ANALYST>"], // Use the competitors provided by analyst
+  "marketTrends": ["Trend 1", "Trend 2", "Trend 3"], // 3 key trends affecting this market based on your knowledge
+  "marketMaturity": "<USE EXACT VALUE FROM ANALYST>", // One of: "Emerging", "Growing", "Mature", "Declining"
+  "entryBarrier": "<USE EXACT VALUE FROM ANALYST>" // One of: "Low", "Medium", "High"
 }
 
 SCORING GUIDELINES:
@@ -74,6 +80,17 @@ export async function generateAnalysis(
   projectName: string,
   rawNotes: RawNotes
 ): Promise<AIAnalysis> {
+  // Build market context section if provided
+  const marketContextSection = rawNotes.marketContext
+    ? `
+MARKET CONTEXT (PROVIDED BY ANALYST - USE THESE VALUES EXACTLY):
+- Sector: ${rawNotes.marketContext.sector}
+- Key Competitors: ${rawNotes.marketContext.competitors || "Not specified"}
+- Market Maturity: ${rawNotes.marketContext.marketMaturity}
+- Entry Barrier: ${rawNotes.marketContext.entryBarrier}
+`
+    : "";
+
   const userPrompt = `Analyze this Web3 project: ${projectName}
 
 AISLE 1 - PRODUCT-MARKET FIT:
@@ -87,8 +104,12 @@ ${rawNotes.aisle3_general}
 
 AISLE 4 - SOCIAL SENTIMENT:
 ${rawNotes.aisle4_sentiment}
-
-Generate the Public Receipt, Private Report, and Market Intelligence based on these notes. Identify what sector/market this project operates in and provide relevant market data.`;
+${marketContextSection}
+Generate the Public Receipt, Private Report, and Market Intelligence based on these notes. ${
+    rawNotes.marketContext
+      ? "Use the exact market context values provided above for sector, competitors, maturity, and entry barrier. Generate TAM, TAM growth rate, user growth potential, and market trends based on your knowledge of this sector."
+      : "Identify what sector/market this project operates in and provide relevant market data."
+  }`;
 
   const anthropic = getAnthropicClient();
   const message = await anthropic.messages.create({

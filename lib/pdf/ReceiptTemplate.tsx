@@ -14,6 +14,21 @@ Font.register({
   src: "https://fonts.gstatic.com/s/courierprime/v9/u-450q2lgwslOqpF_6gQ8kELWwZj.woff2",
 });
 
+// Color helpers
+const getScoreColor = (score: number): string => {
+  if (score >= 8) return "#22c55e"; // green
+  if (score >= 6) return "#F0A202"; // gold
+  if (score >= 4) return "#F18805"; // orange
+  return "#D95D39"; // coral/red
+};
+
+const getScoreLabel = (score: number): string => {
+  if (score >= 8) return "FRESH";
+  if (score >= 6) return "DECENT";
+  if (score >= 4) return "STALE";
+  return "FLOP";
+};
+
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#f5f5dc",
@@ -21,7 +36,7 @@ const styles = StyleSheet.create({
     fontFamily: "Courier",
     fontSize: 10,
     color: "#1a1a1a",
-    width: 300, // Thermal receipt width
+    width: 300,
   },
   header: {
     textAlign: "center",
@@ -70,6 +85,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 5,
   },
+  verdictLabel: {
+    fontSize: 10,
+    fontWeight: "bold",
+    marginTop: 5,
+    letterSpacing: 2,
+  },
   section: {
     marginVertical: 10,
   },
@@ -95,23 +116,36 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 1.4,
   },
-  scoresGrid: {
+  // Score bars
+  scoreBarContainer: {
+    marginVertical: 8,
+  },
+  scoreBarRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 10,
+    alignItems: "center",
+    marginBottom: 8,
   },
-  scoreItem: {
-    textAlign: "center",
-    flex: 1,
-  },
-  scoreItemLabel: {
+  scoreBarLabel: {
+    width: 45,
     fontSize: 8,
     color: "#666",
-    marginBottom: 3,
   },
-  scoreItemValue: {
-    fontSize: 12,
+  scoreBarTrack: {
+    flex: 1,
+    height: 8,
+    backgroundColor: "#ddd",
+    borderRadius: 4,
+    marginHorizontal: 5,
+  },
+  scoreBarFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+  scoreBarValue: {
+    width: 25,
+    fontSize: 9,
     fontWeight: "bold",
+    textAlign: "right",
   },
   totalRow: {
     flexDirection: "row",
@@ -121,6 +155,39 @@ const styles = StyleSheet.create({
     borderTop: "1px solid #ccc",
     fontSize: 12,
     fontWeight: "bold",
+  },
+  // Market Intelligence
+  marketSection: {
+    marginVertical: 10,
+    padding: 10,
+    backgroundColor: "#e8e8d0",
+    borderRadius: 5,
+  },
+  marketRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  marketLabel: {
+    fontSize: 8,
+    color: "#666",
+  },
+  marketValue: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "#1a1a1a",
+  },
+  marketTrendsTitle: {
+    fontSize: 8,
+    color: "#666",
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  marketTrendItem: {
+    fontSize: 7,
+    color: "#444",
+    marginLeft: 5,
+    marginBottom: 2,
   },
   footer: {
     textAlign: "center",
@@ -150,21 +217,40 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
   },
-  tearEdge: {
-    marginTop: 10,
-    height: 15,
-    // Simulated tear edge using a pattern
-  },
 });
 
 interface ReceiptTemplateProps {
   review: Review;
 }
 
+// Score bar component
+function ScoreBar({ label, score }: { label: string; score: number }) {
+  const color = getScoreColor(score);
+  const widthPercent = (score / 10) * 100;
+
+  return (
+    <View style={styles.scoreBarRow}>
+      <Text style={styles.scoreBarLabel}>{label}</Text>
+      <View style={styles.scoreBarTrack}>
+        <View
+          style={[
+            styles.scoreBarFill,
+            { width: `${widthPercent}%`, backgroundColor: color },
+          ]}
+        />
+      </View>
+      <Text style={[styles.scoreBarValue, { color }]}>{score.toFixed(1)}</Text>
+    </View>
+  );
+}
+
 export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
   const receipt = review.ai_data?.publicReceipt;
+  const marketIntel = review.ai_data?.marketIntelligence;
   const score = review.rating_score || 0;
   const isVerified = score >= 8;
+  const verdict = getScoreLabel(score);
+  const verdictColor = getScoreColor(score);
   const date = new Date(review.created_at).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -174,7 +260,7 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
 
   return (
     <Document>
-      <Page size={{ width: 300, height: 800 }} style={styles.page}>
+      <Page size={{ width: 300, height: 950 }} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>BODEGA RESEARCH</Text>
@@ -187,42 +273,32 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
         {/* Project Name */}
         <Text style={styles.projectName}>{review.project_name}</Text>
 
-        {/* Overall Score */}
+        {/* Overall Score with Verdict */}
         <View style={styles.scoreBox}>
           <Text style={styles.scoreLabel}>OVERALL SCORE</Text>
           <Text style={styles.scoreValue}>{score.toFixed(1)}/10</Text>
+          <Text style={[styles.verdictLabel, { color: verdictColor }]}>
+            {verdict}
+          </Text>
         </View>
 
         <View style={styles.divider} />
 
-        {/* Scores Breakdown */}
+        {/* Scores Breakdown with Bars */}
         {receipt && (
           <>
             <Text style={styles.sectionHeader}>ITEM BREAKDOWN</Text>
-            <View style={styles.scoresGrid}>
-              <View style={styles.scoreItem}>
-                <Text style={styles.scoreItemLabel}>PMF</Text>
-                <Text style={styles.scoreItemValue}>
-                  {receipt.scores.pmf}/10
-                </Text>
-              </View>
-              <View style={styles.scoreItem}>
-                <Text style={styles.scoreItemLabel}>UI/UX</Text>
-                <Text style={styles.scoreItemValue}>
-                  {receipt.scores.ui}/10
-                </Text>
-              </View>
-              <View style={styles.scoreItem}>
-                <Text style={styles.scoreItemLabel}>VIBE</Text>
-                <Text style={styles.scoreItemValue}>
-                  {receipt.scores.sentiment}/10
-                </Text>
-              </View>
+            <View style={styles.scoreBarContainer}>
+              <ScoreBar label="PMF" score={receipt.scores.pmf} />
+              <ScoreBar label="UI/UX" score={receipt.scores.ui} />
+              <ScoreBar label="VIBE" score={receipt.scores.sentiment} />
             </View>
 
             <View style={styles.totalRow}>
               <Text>TOTAL</Text>
-              <Text>{receipt.scores.overall}/10</Text>
+              <Text style={{ color: verdictColor }}>
+                {receipt.scores.overall.toFixed(1)}/10
+              </Text>
             </View>
 
             <View style={styles.divider} />
@@ -232,7 +308,7 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
               <Text style={styles.sectionHeader}>+ THE ALPHA</Text>
               {receipt.theAlpha.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bullet}>+</Text>
+                  <Text style={[styles.bullet, { color: "#22c55e" }]}>+</Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
@@ -245,7 +321,7 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
               <Text style={styles.sectionHeader}>! THE FRICTION</Text>
               {receipt.theFriction.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bullet}>!</Text>
+                  <Text style={[styles.bullet, { color: "#D95D39" }]}>!</Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
@@ -258,10 +334,48 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
               <Text style={styles.sectionHeader}>&gt; RECOMMENDATIONS</Text>
               {receipt.recommendations.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bullet}>&gt;</Text>
+                  <Text style={[styles.bullet, { color: "#F0A202" }]}>&gt;</Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
+            </View>
+          </>
+        )}
+
+        {/* Market Intelligence */}
+        {marketIntel && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionHeader}>$ MARKET INTEL</Text>
+            <View style={styles.marketSection}>
+              <View style={styles.marketRow}>
+                <Text style={styles.marketLabel}>Sector:</Text>
+                <Text style={styles.marketValue}>{marketIntel.sector}</Text>
+              </View>
+              <View style={styles.marketRow}>
+                <Text style={styles.marketLabel}>TAM:</Text>
+                <Text style={styles.marketValue}>{marketIntel.tam}</Text>
+              </View>
+              <View style={styles.marketRow}>
+                <Text style={styles.marketLabel}>Growth:</Text>
+                <Text style={styles.marketValue}>{marketIntel.tamGrowthRate}</Text>
+              </View>
+              <View style={styles.marketRow}>
+                <Text style={styles.marketLabel}>Maturity:</Text>
+                <Text style={styles.marketValue}>{marketIntel.marketMaturity}</Text>
+              </View>
+              <View style={styles.marketRow}>
+                <Text style={styles.marketLabel}>Entry Barrier:</Text>
+                <Text style={styles.marketValue}>{marketIntel.entryBarrier}</Text>
+              </View>
+              {marketIntel.keyCompetitors?.length > 0 && (
+                <View style={styles.marketRow}>
+                  <Text style={styles.marketLabel}>Competitors:</Text>
+                  <Text style={styles.marketValue}>
+                    {marketIntel.keyCompetitors.slice(0, 3).join(", ")}
+                  </Text>
+                </View>
+              )}
             </View>
           </>
         )}

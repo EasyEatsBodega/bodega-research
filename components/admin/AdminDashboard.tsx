@@ -11,6 +11,8 @@ import {
   Users,
   BarChart3,
   Receipt,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +33,29 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("new-review");
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Review | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteReview = async (review: Review) => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/reviews/${review.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete review");
+      }
+
+      setDeleteConfirm(null);
+      router.refresh();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete review. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -202,19 +227,27 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                           <th className="text-left p-4 font-mono text-sm text-gray-400">
                             Status
                           </th>
+                          <th className="text-right p-4 font-mono text-sm text-gray-400">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {reviews.map((review) => (
                           <tr
                             key={review.id}
-                            onClick={() => setSelectedReview(review)}
-                            className="border-b border-border hover:bg-surface-tertiary transition-colors cursor-pointer"
+                            className="border-b border-border hover:bg-surface-tertiary transition-colors"
                           >
-                            <td className="p-4 font-mono text-foreground">
+                            <td
+                              className="p-4 font-mono text-foreground cursor-pointer"
+                              onClick={() => setSelectedReview(review)}
+                            >
                               {review.project_name}
                             </td>
-                            <td className="p-4">
+                            <td
+                              className="p-4 cursor-pointer"
+                              onClick={() => setSelectedReview(review)}
+                            >
                               <span
                                 className={`font-mono font-bold ${
                                   (review.rating_score || 0) >= 8
@@ -227,10 +260,16 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                                 {review.rating_score?.toFixed(1) || "-"}
                               </span>
                             </td>
-                            <td className="p-4 font-mono text-sm text-gray-400">
+                            <td
+                              className="p-4 font-mono text-sm text-gray-400 cursor-pointer"
+                              onClick={() => setSelectedReview(review)}
+                            >
                               {new Date(review.created_at).toLocaleDateString()}
                             </td>
-                            <td className="p-4">
+                            <td
+                              className="p-4 cursor-pointer"
+                              onClick={() => setSelectedReview(review)}
+                            >
                               <span
                                 className={`inline-flex px-2 py-1 rounded text-xs font-mono ${
                                   review.infographic_url
@@ -241,12 +280,24 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
                                 {review.infographic_url ? "Published" : "Draft"}
                               </span>
                             </td>
+                            <td className="p-4 text-right">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteConfirm(review);
+                                }}
+                                className="p-2 rounded-lg text-gray-500 hover:text-bodega-coral hover:bg-bodega-burgundy/20 transition-colors"
+                                title="Delete review"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
                           </tr>
                         ))}
                         {reviews.length === 0 && (
                           <tr>
                             <td
-                              colSpan={4}
+                              colSpan={5}
                               className="p-8 text-center text-gray-500 font-mono"
                             >
                               No reviews yet. Create your first one!
@@ -366,6 +417,65 @@ export function AdminDashboard({ user, reviews, leads }: AdminDashboardProps) {
         isOpen={!!selectedReview}
         onClose={() => setSelectedReview(null)}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => !isDeleting && setDeleteConfirm(null)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative bg-surface-secondary border border-border rounded-xl p-6 max-w-md w-full"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-bodega-burgundy/20 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-bodega-coral" />
+              </div>
+              <div>
+                <h3 className="font-mono font-bold text-lg text-foreground">
+                  Delete Review
+                </h3>
+                <p className="text-sm text-gray-400 font-mono">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+
+            <p className="text-gray-300 font-mono text-sm mb-6">
+              Are you sure you want to delete the review for{" "}
+              <span className="text-bodega-gold font-bold">
+                {deleteConfirm.project_name}
+              </span>
+              ? All associated data including images and reports will be
+              permanently removed.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1 !bg-bodega-burgundy hover:!bg-bodega-coral"
+                onClick={() => handleDeleteReview(deleteConfirm)}
+                isLoading={isDeleting}
+                leftIcon={<Trash2 className="w-4 h-4" />}
+              >
+                Delete
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

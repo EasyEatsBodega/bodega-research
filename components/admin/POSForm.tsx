@@ -12,12 +12,41 @@ import {
   ImagePlus,
   Lightbulb,
   X,
+  TrendingUp,
+  ChevronDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { AisleInput } from "./AisleInput";
 import { PrintAnimation } from "./PrintAnimation";
-import type { ReviewFormData } from "@/types";
+import type { ReviewFormData, MarketSector, MarketMaturityLevel, EntryBarrierLevel } from "@/types";
+
+const SECTOR_OPTIONS: { value: MarketSector; label: string }[] = [
+  { value: "DeFi", label: "DeFi" },
+  { value: "NFT/Digital Collectibles", label: "NFT/Digital Collectibles" },
+  { value: "Gaming/GameFi", label: "Gaming/GameFi" },
+  { value: "Layer 1/Layer 2", label: "Layer 1/Layer 2" },
+  { value: "Social/SocialFi", label: "Social/SocialFi" },
+  { value: "DAO Tooling", label: "DAO Tooling" },
+  { value: "Infrastructure", label: "Infrastructure" },
+  { value: "Wallet/Payments", label: "Wallet/Payments" },
+  { value: "Data/Analytics", label: "Data/Analytics" },
+  { value: "Security/Auditing", label: "Security/Auditing" },
+  { value: "Other", label: "Other" },
+];
+
+const MATURITY_OPTIONS: { value: MarketMaturityLevel; label: string; description: string }[] = [
+  { value: "Emerging", label: "Emerging", description: "New market, few players" },
+  { value: "Growing", label: "Growing", description: "Expanding market, increasing competition" },
+  { value: "Mature", label: "Mature", description: "Established market, well-defined leaders" },
+  { value: "Declining", label: "Declining", description: "Shrinking market, consolidation" },
+];
+
+const BARRIER_OPTIONS: { value: EntryBarrierLevel; label: string; description: string }[] = [
+  { value: "Low", label: "Low", description: "Easy to enter, low capital" },
+  { value: "Medium", label: "Medium", description: "Some technical/capital barriers" },
+  { value: "High", label: "High", description: "Significant barriers to entry" },
+];
 
 interface POSFormProps {
   onSuccess?: () => void;
@@ -32,6 +61,10 @@ export function POSForm({ onSuccess }: POSFormProps) {
     aisle3_general: "",
     aisle4_sentiment: "",
     my_recommendations: "",
+    marketSector: "DeFi",
+    marketCompetitors: "",
+    marketMaturity: "Growing",
+    entryBarrier: "Medium",
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +106,12 @@ export function POSForm({ onSuccess }: POSFormProps) {
         aisle3_general: formData.aisle3_general,
         aisle4_sentiment: formData.aisle4_sentiment,
         my_recommendations: formData.my_recommendations,
+        marketContext: {
+          sector: formData.marketSector,
+          competitors: formData.marketCompetitors,
+          marketMaturity: formData.marketMaturity,
+          entryBarrier: formData.entryBarrier,
+        },
       }));
       if (formData.brandImage) {
         submitData.append("brandImage", formData.brandImage);
@@ -103,6 +142,10 @@ export function POSForm({ onSuccess }: POSFormProps) {
           aisle3_general: "",
           aisle4_sentiment: "",
           my_recommendations: "",
+          marketSector: "DeFi",
+          marketCompetitors: "",
+          marketMaturity: "Growing",
+          entryBarrier: "Medium",
         });
         setImagePreview(null);
         onSuccess?.();
@@ -124,6 +167,10 @@ export function POSForm({ onSuccess }: POSFormProps) {
       aisle3_general: "",
       aisle4_sentiment: "",
       my_recommendations: "",
+      marketSector: "DeFi",
+      marketCompetitors: "",
+      marketMaturity: "Growing",
+      entryBarrier: "Medium",
     });
     setImagePreview(null);
     setError(null);
@@ -251,6 +298,133 @@ export function POSForm({ onSuccess }: POSFormProps) {
             placeholder="Notes on community, social presence, sentiment..."
           />
         </div>
+
+        {/* Market Context Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="bg-surface-secondary border border-border rounded-xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-bodega-orange/20 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-bodega-orange" />
+            </div>
+            <div>
+              <span className="font-mono text-xs text-bodega-orange uppercase tracking-wider">
+                MARKET INTEL
+              </span>
+              <h3 className="font-mono font-bold text-foreground">
+                Market Context
+              </h3>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 font-mono mb-6 pl-12">
+            Provide context about the market/sector this project operates in
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sector Dropdown */}
+            <div className="space-y-2">
+              <label className="block text-sm font-mono text-gray-400 uppercase tracking-wider">
+                Sector
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.marketSector}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      marketSector: e.target.value as MarketSector,
+                    })
+                  }
+                  className="w-full bg-surface-tertiary border border-border rounded-lg px-4 py-3 font-mono text-foreground appearance-none cursor-pointer hover:border-bodega-gold/50 focus:border-bodega-gold focus:outline-none focus:ring-1 focus:ring-bodega-gold transition-colors"
+                >
+                  {SECTOR_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Market Maturity Dropdown */}
+            <div className="space-y-2">
+              <label className="block text-sm font-mono text-gray-400 uppercase tracking-wider">
+                Market Maturity
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.marketMaturity}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      marketMaturity: e.target.value as MarketMaturityLevel,
+                    })
+                  }
+                  className="w-full bg-surface-tertiary border border-border rounded-lg px-4 py-3 font-mono text-foreground appearance-none cursor-pointer hover:border-bodega-gold/50 focus:border-bodega-gold focus:outline-none focus:ring-1 focus:ring-bodega-gold transition-colors"
+                >
+                  {MATURITY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label} - {option.description}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Entry Barrier Dropdown */}
+            <div className="space-y-2">
+              <label className="block text-sm font-mono text-gray-400 uppercase tracking-wider">
+                Entry Barrier
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.entryBarrier}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      entryBarrier: e.target.value as EntryBarrierLevel,
+                    })
+                  }
+                  className="w-full bg-surface-tertiary border border-border rounded-lg px-4 py-3 font-mono text-foreground appearance-none cursor-pointer hover:border-bodega-gold/50 focus:border-bodega-gold focus:outline-none focus:ring-1 focus:ring-bodega-gold transition-colors"
+                >
+                  {BARRIER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label} - {option.description}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Competitors Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-mono text-gray-400 uppercase tracking-wider">
+                Key Competitors
+              </label>
+              <input
+                type="text"
+                value={formData.marketCompetitors}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    marketCompetitors: e.target.value,
+                  })
+                }
+                placeholder="Aave, Compound, MakerDAO..."
+                className="w-full bg-surface-tertiary border border-border rounded-lg px-4 py-3 font-mono text-foreground placeholder:text-gray-500 focus:outline-none focus:border-bodega-gold focus:ring-1 focus:ring-bodega-gold transition-colors"
+              />
+              <p className="text-xs text-gray-500 font-mono">
+                Comma-separated list of main competitors
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* My Recommendations - Full Width */}
         <motion.div

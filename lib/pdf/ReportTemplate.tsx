@@ -25,6 +25,16 @@ Font.register({
 
 const GOLD = "#F0A202";
 const NAVY = "#202C59";
+const GREEN = "#22c55e";
+const CORAL = "#D95D39";
+
+// Score color helper
+const getScoreColor = (score: number): string => {
+  if (score >= 8) return GREEN;
+  if (score >= 6) return GOLD;
+  if (score >= 4) return "#F18805";
+  return CORAL;
+};
 
 const styles = StyleSheet.create({
   page: {
@@ -164,6 +174,67 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#333",
   },
+  // Market Intelligence
+  marketGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    backgroundColor: "#f8f9fa",
+    borderRadius: 5,
+    padding: 15,
+    marginTop: 10,
+  },
+  marketCard: {
+    width: "33%",
+    padding: 10,
+    textAlign: "center",
+  },
+  marketCardLabel: {
+    fontSize: 8,
+    color: "#666",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  marketCardValue: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: NAVY,
+    marginTop: 3,
+  },
+  marketTrendsContainer: {
+    marginTop: 15,
+  },
+  marketTrendItem: {
+    flexDirection: "row",
+    marginBottom: 5,
+    paddingLeft: 10,
+  },
+  marketTrendBullet: {
+    width: 15,
+    fontSize: 10,
+    color: GOLD,
+  },
+  marketTrendText: {
+    flex: 1,
+    fontSize: 10,
+    color: "#555",
+  },
+  competitorsList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 5,
+  },
+  competitorTag: {
+    backgroundColor: "#e9ecef",
+    borderRadius: 3,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  competitorText: {
+    fontSize: 9,
+    color: "#495057",
+  },
   // Footer
   footer: {
     position: "absolute",
@@ -193,8 +264,10 @@ interface ReportTemplateProps {
 
 export function ReportTemplate({ review }: ReportTemplateProps) {
   const receipt = review.ai_data?.publicReceipt;
+  const marketIntel = review.ai_data?.marketIntelligence;
   const report = review.ai_data?.privateReport || "";
   const score = review.rating_score || 0;
+  const scoreColor = getScoreColor(score);
   const date = new Date(review.created_at).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -226,7 +299,7 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
           <Text style={styles.documentLabel}>Due Diligence Report</Text>
           <Text style={styles.projectName}>{review.project_name}</Text>
           <View style={styles.scoreContainer}>
-            <View style={styles.scoreBadge}>
+            <View style={[styles.scoreBadge, { backgroundColor: scoreColor }]}>
               <Text style={styles.scoreBadgeText}>
                 Overall Score: {score.toFixed(1)}/10
               </Text>
@@ -234,27 +307,116 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
           </View>
         </View>
 
-        {/* Scores Grid */}
+        {/* Scores Grid with Colors */}
         {receipt && (
           <View style={styles.scoresGrid}>
             <View style={styles.scoreCard}>
               <Text style={styles.scoreCardLabel}>Product-Market Fit</Text>
-              <Text style={styles.scoreCardValue}>{receipt.scores.pmf}</Text>
+              <Text
+                style={[
+                  styles.scoreCardValue,
+                  { color: getScoreColor(receipt.scores.pmf) },
+                ]}
+              >
+                {receipt.scores.pmf}
+              </Text>
             </View>
             <View style={styles.scoreCard}>
               <Text style={styles.scoreCardLabel}>UI/UX Quality</Text>
-              <Text style={styles.scoreCardValue}>{receipt.scores.ui}</Text>
+              <Text
+                style={[
+                  styles.scoreCardValue,
+                  { color: getScoreColor(receipt.scores.ui) },
+                ]}
+              >
+                {receipt.scores.ui}
+              </Text>
             </View>
             <View style={styles.scoreCard}>
               <Text style={styles.scoreCardLabel}>Social Sentiment</Text>
-              <Text style={styles.scoreCardValue}>
+              <Text
+                style={[
+                  styles.scoreCardValue,
+                  { color: getScoreColor(receipt.scores.sentiment) },
+                ]}
+              >
                 {receipt.scores.sentiment}
               </Text>
             </View>
             <View style={styles.scoreCard}>
               <Text style={styles.scoreCardLabel}>Overall</Text>
-              <Text style={styles.scoreCardValue}>{receipt.scores.overall}</Text>
+              <Text style={[styles.scoreCardValue, { color: scoreColor }]}>
+                {receipt.scores.overall}
+              </Text>
             </View>
+          </View>
+        )}
+
+        {/* Market Intelligence Section */}
+        {marketIntel && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Market Intelligence</Text>
+            <View style={styles.marketGrid}>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>Sector</Text>
+                <Text style={styles.marketCardValue}>{marketIntel.sector}</Text>
+              </View>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>TAM</Text>
+                <Text style={styles.marketCardValue}>{marketIntel.tam}</Text>
+              </View>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>Growth Rate</Text>
+                <Text style={styles.marketCardValue}>
+                  {marketIntel.tamGrowthRate}
+                </Text>
+              </View>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>Market Maturity</Text>
+                <Text style={styles.marketCardValue}>
+                  {marketIntel.marketMaturity}
+                </Text>
+              </View>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>Entry Barrier</Text>
+                <Text style={styles.marketCardValue}>
+                  {marketIntel.entryBarrier}
+                </Text>
+              </View>
+              <View style={styles.marketCard}>
+                <Text style={styles.marketCardLabel}>User Growth</Text>
+                <Text style={styles.marketCardValue}>
+                  {marketIntel.userGrowthPotential}
+                </Text>
+              </View>
+            </View>
+
+            {/* Key Competitors */}
+            {marketIntel.keyCompetitors?.length > 0 && (
+              <View style={{ marginTop: 15 }}>
+                <Text style={styles.marketCardLabel}>Key Competitors</Text>
+                <View style={styles.competitorsList}>
+                  {marketIntel.keyCompetitors.map((competitor, i) => (
+                    <View key={i} style={styles.competitorTag}>
+                      <Text style={styles.competitorText}>{competitor}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Market Trends */}
+            {marketIntel.marketTrends?.length > 0 && (
+              <View style={styles.marketTrendsContainer}>
+                <Text style={styles.marketCardLabel}>Market Trends</Text>
+                {marketIntel.marketTrends.map((trend, i) => (
+                  <View key={i} style={styles.marketTrendItem}>
+                    <Text style={styles.marketTrendBullet}>→</Text>
+                    <Text style={styles.marketTrendText}>{trend}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
@@ -276,7 +438,7 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
               <Text style={styles.sectionTitle}>Key Strengths</Text>
               {receipt.theAlpha.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bulletPoint}>+</Text>
+                  <Text style={[styles.bulletPoint, { color: GREEN }]}>+</Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
@@ -286,7 +448,7 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
               <Text style={styles.sectionTitle}>Areas of Concern</Text>
               {receipt.theFriction.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bulletPoint}>!</Text>
+                  <Text style={[styles.bulletPoint, { color: CORAL }]}>!</Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
@@ -296,7 +458,9 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
               <Text style={styles.sectionTitle}>Recommendations</Text>
               {receipt.recommendations.map((item, i) => (
                 <View key={i} style={styles.listItem}>
-                  <Text style={styles.bulletPoint}>{i + 1}.</Text>
+                  <Text style={[styles.bulletPoint, { color: GOLD }]}>
+                    {i + 1}.
+                  </Text>
                   <Text style={styles.listText}>{item}</Text>
                 </View>
               ))}
@@ -307,7 +471,7 @@ export function ReportTemplate({ review }: ReportTemplateProps) {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            &copy; {new Date().getFullYear()} Bodega Research. All rights reserved.
+            © {new Date().getFullYear()} Bodega Research. All rights reserved.
           </Text>
           <Text style={styles.confidential}>Confidential</Text>
         </View>

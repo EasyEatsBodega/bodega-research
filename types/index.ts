@@ -24,6 +24,31 @@ export interface Lead {
   created_at: string;
 }
 
+// Market context options for admin input
+export type MarketSector =
+  | "DeFi"
+  | "NFT/Digital Collectibles"
+  | "Gaming/GameFi"
+  | "Layer 1/Layer 2"
+  | "Social/SocialFi"
+  | "DAO Tooling"
+  | "Infrastructure"
+  | "Wallet/Payments"
+  | "Data/Analytics"
+  | "Security/Auditing"
+  | "Other";
+
+export type MarketMaturityLevel = "Emerging" | "Growing" | "Mature" | "Declining";
+export type EntryBarrierLevel = "Low" | "Medium" | "High";
+
+// Admin-provided market context
+export interface MarketContext {
+  sector: MarketSector;
+  competitors: string; // Comma-separated list
+  marketMaturity: MarketMaturityLevel;
+  entryBarrier: EntryBarrierLevel;
+}
+
 // Raw notes structure (Admin input)
 export interface RawNotes {
   aisle1_pmf: string; // Product-Market Fit
@@ -31,6 +56,7 @@ export interface RawNotes {
   aisle3_general: string; // General App Assessment
   aisle4_sentiment: string; // Social Sentiment
   my_recommendations?: string; // Admin's personal recommendations
+  marketContext?: MarketContext; // Admin-provided market context
 }
 
 // Market Intelligence data
@@ -73,6 +99,11 @@ export interface ReviewFormData {
   aisle3_general: string;
   aisle4_sentiment: string;
   my_recommendations: string;
+  // Market context fields
+  marketSector: MarketSector;
+  marketCompetitors: string;
+  marketMaturity: MarketMaturityLevel;
+  entryBarrier: EntryBarrierLevel;
 }
 
 export type ContactMethod = "x_dms" | "email" | "telegram" | "other";
