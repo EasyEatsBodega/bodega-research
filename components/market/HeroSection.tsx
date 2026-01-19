@@ -100,7 +100,7 @@ export function HeroSection() {
                 <Scan className="w-7 h-7 text-bodega-gold" />
               </div>
               <span className="font-mono text-xl md:text-2xl font-bold text-foreground block">
-                Taking
+                Open for
               </span>
               <p className="text-xs md:text-sm text-gray-500 font-mono mt-1">
                 Customers
@@ -110,11 +110,11 @@ export function HeroSection() {
               <div className="w-16 h-16 mx-auto mb-3 rounded-lg bg-surface-tertiary border border-border flex items-center justify-center group-hover:border-bodega-gold group-hover:neon-box transition-all duration-300">
                 <ShieldCheck className="w-7 h-7 text-bodega-gold" />
               </div>
-              <span className="font-mono text-xl md:text-2xl font-bold text-foreground block">
-                Fresh or
+              <span className="font-mono text-lg md:text-xl font-bold text-foreground block">
+                Are They...
               </span>
               <p className="text-xs md:text-sm text-gray-500 font-mono mt-1">
-                Flop
+                Fresh or a Flop
               </p>
             </div>
             <div className="text-center group">
