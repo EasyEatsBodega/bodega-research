@@ -19,11 +19,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const { projectName, rawNotes } = body as {
-      projectName: string;
-      rawNotes: RawNotes;
-    };
+    // Parse FormData
+    const formData = await request.formData();
+    const projectName = formData.get("projectName") as string;
+    const rawNotesJson = formData.get("rawNotes") as string;
+    const brandImage = formData.get("brandImage") as File | null;
+
+    const rawNotes: RawNotes = JSON.parse(rawNotesJson);
 
     // Validate input
     if (!projectName || !rawNotes) {
@@ -45,6 +47,31 @@ export async function POST(request: Request) {
       );
     }
 
+    const adminClient = createAdminClient();
+    let brandImageUrl: string | null = null;
+
+    // Upload brand image if provided
+    if (brandImage && brandImage.size > 0) {
+      const fileExt = brandImage.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `brand-images/${fileName}`;
+
+      const { error: uploadError } = await adminClient.storage
+        .from("public-infographics")
+        .upload(filePath, brandImage, {
+          contentType: brandImage.type,
+        });
+
+      if (uploadError) {
+        console.error("Image upload error:", uploadError);
+      } else {
+        const { data: urlData } = adminClient.storage
+          .from("public-infographics")
+          .getPublicUrl(filePath);
+        brandImageUrl = urlData.publicUrl;
+      }
+    }
+
     // Generate AI analysis
     console.log(`Generating analysis for: ${projectName}`);
     const aiData = await generateAnalysis(projectName, rawNotes);
@@ -54,11 +81,11 @@ export async function POST(request: Request) {
     aiData.publicReceipt.scores.overall = overallScore;
 
     // Save to database
-    const adminClient = createAdminClient();
     const { data: review, error: dbError } = await adminClient
       .from("reviews")
       .insert({
         project_name: projectName,
+        brand_image_url: brandImageUrl,
         raw_notes: rawNotes,
         ai_data: aiData,
         rating_score: overallScore,

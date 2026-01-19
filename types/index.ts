@@ -2,6 +2,7 @@
 export interface Review {
   id: string;
   project_name: string;
+  brand_image_url: string | null;
   raw_notes: RawNotes;
   ai_data: AIAnalysis | null;
   infographic_url: string | null;
@@ -29,6 +30,7 @@ export interface RawNotes {
   aisle2_uiux: string; // UI/UX Quality
   aisle3_general: string; // General App Assessment
   aisle4_sentiment: string; // Social Sentiment
+  my_recommendations?: string; // Admin's personal recommendations
 }
 
 // AI-generated analysis
@@ -52,10 +54,12 @@ export interface PublicReceipt {
 // Form types
 export interface ReviewFormData {
   projectName: string;
+  brandImage: File | null;
   aisle1_pmf: string;
   aisle2_uiux: string;
   aisle3_general: string;
   aisle4_sentiment: string;
+  my_recommendations: string;
 }
 
 export type ContactMethod = "x_dms" | "email" | "telegram" | "other";

@@ -9,6 +9,7 @@ import {
   FileText,
   Lock,
   Download,
+  User,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { ScoreBadge } from "@/components/ui/ScoreBadge";
@@ -53,9 +54,26 @@ export function ReviewDetailModal({
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-border">
               <div className="flex items-center gap-4">
-                <h2 className="font-mono font-bold text-xl text-foreground">
-                  {review.project_name}
-                </h2>
+                {/* Brand Image */}
+                {review.brand_image_url ? (
+                  <img
+                    src={review.brand_image_url}
+                    alt={review.project_name}
+                    className="w-12 h-12 rounded-lg object-contain bg-surface-tertiary border border-border"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-surface-tertiary border border-border flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-gray-500" />
+                  </div>
+                )}
+                <div>
+                  <h2 className="font-mono font-bold text-xl text-foreground">
+                    {review.project_name}
+                  </h2>
+                  <p className="text-xs text-gray-500 font-mono">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </p>
+                </div>
                 <ScoreBadge score={review.rating_score || 0} size="md" />
               </div>
               <button
@@ -157,12 +175,12 @@ export function ReviewDetailModal({
                       </ul>
                     </div>
 
-                    {/* Recommendations */}
+                    {/* AI Recommendations */}
                     <div className="bg-surface-tertiary rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Lightbulb className="w-4 h-4 text-bodega-gold" />
                         <h4 className="font-mono font-bold text-sm text-bodega-gold">
-                          RECOMMENDATIONS
+                          AI RECOMMENDATIONS
                         </h4>
                       </div>
                       <ul className="space-y-2">
@@ -177,6 +195,21 @@ export function ReviewDetailModal({
                         ))}
                       </ul>
                     </div>
+
+                    {/* Admin's Personal Recommendations */}
+                    {review.raw_notes?.my_recommendations && (
+                      <div className="bg-bodega-gold/10 border border-bodega-gold/30 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <User className="w-4 h-4 text-bodega-gold" />
+                          <h4 className="font-mono font-bold text-sm text-bodega-gold">
+                            BODEGA&apos;S TAKE
+                          </h4>
+                        </div>
+                        <p className="text-sm text-gray-300 font-mono whitespace-pre-wrap">
+                          {review.raw_notes.my_recommendations}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column - Private Report */}
