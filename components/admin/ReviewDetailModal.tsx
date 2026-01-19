@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -15,6 +17,10 @@ import {
   Target,
   Zap,
   BarChart2,
+  FileUp,
+  Share2,
+  Check,
+  Loader2,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -79,11 +85,92 @@ export function ReviewDetailModal({
   isOpen,
   onClose,
 }: ReviewDetailModalProps) {
+  const router = useRouter();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   if (!review) return null;
 
   const receipt = review.ai_data?.publicReceipt;
   const privateReport = review.ai_data?.privateReport;
   const market = review.ai_data?.marketIntelligence;
+
+  const handleGeneratePDFs = async () => {
+    setIsGenerating(true);
+    setGenerationStatus("Generating receipt PDF...");
+
+    try {
+      // Generate infographic (receipt) PDF
+      const receiptRes = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id, type: "infographic" }),
+      });
+
+      if (!receiptRes.ok) {
+        throw new Error("Failed to generate receipt PDF");
+      }
+
+      setGenerationStatus("Generating analyst report PDF...");
+
+      // Generate report PDF
+      const reportRes = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id, type: "report" }),
+      });
+
+      if (!reportRes.ok) {
+        throw new Error("Failed to generate report PDF");
+      }
+
+      setGenerationStatus("PDFs generated successfully!");
+
+      // Refresh the page data to get updated URLs
+      setTimeout(() => {
+        router.refresh();
+        setGenerationStatus(null);
+      }, 1500);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      setGenerationStatus("Error generating PDFs");
+      setTimeout(() => setGenerationStatus(null), 3000);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleExport = async () => {
+    // Create a shareable summary
+    const shareText = `
+📊 Bodega Research Review: ${review.project_name}
+
+Overall Score: ${review.rating_score?.toFixed(1) || "N/A"}/10
+
+✅ THE ALPHA:
+${receipt?.theAlpha.map((a) => `• ${a}`).join("\n") || "N/A"}
+
+⚠️ THE FRICTION:
+${receipt?.theFriction.map((f) => `• ${f}`).join("\n") || "N/A"}
+
+💡 RECOMMENDATIONS:
+${receipt?.recommendations.map((r, i) => `${i + 1}. ${r}`).join("\n") || "N/A"}
+
+${market ? `📈 Market: ${market.sector} | TAM: ${market.tam} | Growth: ${market.tamGrowthRate}` : ""}
+
+---
+Powered by Bodega Research
+    `.trim();
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -348,12 +435,12 @@ export function ReviewDetailModal({
                         </ul>
                       </div>
 
-                      {/* AI Recommendations */}
+                      {/* Recommendations TLDR */}
                       <div className="bg-surface-tertiary rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-3">
                           <Lightbulb className="w-4 h-4 text-bodega-gold" />
                           <h4 className="font-mono font-bold text-sm text-bodega-gold">
-                            AI RECOMMENDATIONS
+                            RECOMMENDATIONS TLDR
                           </h4>
                         </div>
                         <ul className="space-y-2">
@@ -375,7 +462,7 @@ export function ReviewDetailModal({
                           <div className="flex items-center gap-2 mb-3">
                             <User className="w-4 h-4 text-bodega-gold" />
                             <h4 className="font-mono font-bold text-sm text-bodega-gold">
-                              BODEGA&apos;S TAKE
+                              EASY&apos;S TAKE
                             </h4>
                           </div>
                           <p className="text-sm text-gray-300 font-mono whitespace-pre-wrap">
@@ -385,12 +472,12 @@ export function ReviewDetailModal({
                       )}
                     </div>
 
-                    {/* Right Column - Private Report */}
+                    {/* Right Column - Analyst Report */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
                         <Lock className="w-5 h-5 text-bodega-gold" />
                         <h3 className="font-mono font-bold text-lg text-foreground">
-                          Private Analyst Report
+                          Analyst Report
                         </h3>
                       </div>
 
@@ -419,11 +506,44 @@ export function ReviewDetailModal({
             </div>
 
             {/* Footer with Actions */}
-            <div className="border-t border-border p-4 flex justify-between items-center">
-              <div className="text-xs text-gray-500 font-mono">
-                Created: {new Date(review.created_at).toLocaleString()}
+            <div className="border-t border-border p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-gray-500 font-mono">
+                  Created: {new Date(review.created_at).toLocaleString()}
+                </div>
+                {generationStatus && (
+                  <div className="flex items-center gap-2 text-xs font-mono text-bodega-gold">
+                    {isGenerating && <Loader2 className="w-3 h-3 animate-spin" />}
+                    {generationStatus}
+                  </div>
+                )}
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
+                {/* Export Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                  onClick={handleExport}
+                  disabled={!receipt}
+                >
+                  {copied ? "Copied!" : "Export Summary"}
+                </Button>
+
+                {/* Generate PDFs Button - show if PDFs don't exist */}
+                {(!review.infographic_url || !review.report_url) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
+                    onClick={handleGeneratePDFs}
+                    disabled={isGenerating || !receipt}
+                  >
+                    {isGenerating ? "Generating..." : "Generate PDFs"}
+                  </Button>
+                )}
+
+                {/* Download Buttons - show if PDFs exist */}
                 {review.infographic_url && (
                   <Button
                     variant="outline"
@@ -431,7 +551,7 @@ export function ReviewDetailModal({
                     leftIcon={<Download className="w-4 h-4" />}
                     onClick={() => window.open(review.infographic_url!, "_blank")}
                   >
-                    Public Receipt
+                    Receipt PDF
                   </Button>
                 )}
                 {review.report_url && (
@@ -440,13 +560,8 @@ export function ReviewDetailModal({
                     leftIcon={<Download className="w-4 h-4" />}
                     onClick={() => window.open(review.report_url!, "_blank")}
                   >
-                    Full Report
+                    Report PDF
                   </Button>
-                )}
-                {!review.infographic_url && !review.report_url && (
-                  <span className="text-xs text-gray-500 font-mono">
-                    PDFs not generated yet
-                  </span>
                 )}
               </div>
             </div>

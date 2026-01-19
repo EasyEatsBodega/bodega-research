@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
   Font,
+  Image,
 } from "@react-pdf/renderer";
 import type { Review } from "@/types";
 
@@ -217,6 +218,95 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
   },
+  // Logo styles
+  logoContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    objectFit: "contain",
+    borderRadius: 5,
+  },
+  // Page 2 styles
+  page2Header: {
+    textAlign: "center",
+    marginBottom: 10,
+    paddingBottom: 10,
+    borderBottom: "2px dashed #ccc",
+  },
+  page2Title: {
+    fontSize: 12,
+    fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  page2Subtitle: {
+    fontSize: 8,
+    color: "#666",
+    marginTop: 3,
+  },
+  analystSection: {
+    marginVertical: 10,
+  },
+  analystTitle: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  analystText: {
+    fontSize: 8,
+    lineHeight: 1.5,
+    color: "#333",
+    textAlign: "justify",
+  },
+  bodegaTakeSection: {
+    marginVertical: 10,
+    padding: 10,
+    backgroundColor: "#fff8e1",
+    borderRadius: 5,
+    borderLeft: "3px solid #F0A202",
+  },
+  bodegaTakeTitle: {
+    fontSize: 9,
+    fontWeight: "bold",
+    color: "#F0A202",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  bodegaTakeText: {
+    fontSize: 8,
+    lineHeight: 1.5,
+    color: "#333",
+  },
+  marketTrendsList: {
+    marginTop: 8,
+  },
+  marketTrendRow: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+  marketTrendArrow: {
+    width: 12,
+    fontSize: 8,
+    color: "#F0A202",
+  },
+  marketTrendText: {
+    flex: 1,
+    fontSize: 7,
+    color: "#444",
+    lineHeight: 1.4,
+  },
+  continuedText: {
+    fontSize: 7,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 10,
+  },
 });
 
 interface ReceiptTemplateProps {
@@ -247,6 +337,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
   const receipt = review.ai_data?.publicReceipt;
   const marketIntel = review.ai_data?.marketIntelligence;
+  const bodegaTake = review.raw_notes?.my_recommendations;
   const score = review.rating_score || 0;
   const isVerified = score >= 8;
   const verdict = getScoreLabel(score);
@@ -258,9 +349,12 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
     day: "numeric",
   });
 
+  // Check if we have content for page 2 (Bodega's Take or Market Trends)
+  const hasPage2Content = bodegaTake || (marketIntel?.marketTrends && marketIntel.marketTrends.length > 0);
+
   return (
     <Document>
-      <Page size={{ width: 300, height: 950 }} style={styles.page}>
+      <Page size={{ width: 300, height: 1050 }} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>BODEGA RESEARCH</Text>
@@ -269,6 +363,13 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
         </View>
 
         <View style={styles.divider} />
+
+        {/* Project Logo */}
+        {review.brand_image_url && (
+          <View style={styles.logoContainer}>
+            <Image src={review.brand_image_url} style={styles.logo} />
+          </View>
+        )}
 
         {/* Project Name */}
         <Text style={styles.projectName}>{review.project_name}</Text>
@@ -284,25 +385,9 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
 
         <View style={styles.divider} />
 
-        {/* Scores Breakdown with Bars */}
+        {/* Content sections - Alpha, Friction, Recommendations first */}
         {receipt && (
           <>
-            <Text style={styles.sectionHeader}>ITEM BREAKDOWN</Text>
-            <View style={styles.scoreBarContainer}>
-              <ScoreBar label="PMF" score={receipt.scores.pmf} />
-              <ScoreBar label="UI/UX" score={receipt.scores.ui} />
-              <ScoreBar label="VIBE" score={receipt.scores.sentiment} />
-            </View>
-
-            <View style={styles.totalRow}>
-              <Text>TOTAL</Text>
-              <Text style={{ color: verdictColor }}>
-                {receipt.scores.overall.toFixed(1)}/10
-              </Text>
-            </View>
-
-            <View style={styles.divider} />
-
             {/* The Alpha */}
             <View style={styles.section}>
               <Text style={styles.sectionHeader}>+ THE ALPHA</Text>
@@ -380,6 +465,26 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
           </>
         )}
 
+        {/* Item Breakdown at bottom - like a real receipt */}
+        {receipt && (
+          <>
+            <View style={styles.divider} />
+            <Text style={styles.sectionHeader}>ITEM BREAKDOWN</Text>
+            <View style={styles.scoreBarContainer}>
+              <ScoreBar label="PMF" score={receipt.scores.pmf} />
+              <ScoreBar label="UI/UX" score={receipt.scores.ui} />
+              <ScoreBar label="VIBE" score={receipt.scores.sentiment} />
+            </View>
+
+            <View style={styles.totalRow}>
+              <Text>TOTAL</Text>
+              <Text style={{ color: verdictColor }}>
+                {receipt.scores.overall.toFixed(1)}/10
+              </Text>
+            </View>
+          </>
+        )}
+
         <View style={styles.divider} />
 
         {/* Footer */}
@@ -395,8 +500,63 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
               <Text style={styles.verifiedText}>BODEGA VERIFIED</Text>
             </View>
           )}
+
+          {/* Continued indicator */}
+          {hasPage2Content && (
+            <Text style={styles.continuedText}>... CONTINUED ON NEXT PAGE ...</Text>
+          )}
         </View>
       </Page>
+
+      {/* PAGE 2 - Analyst Report & Bodega's Take */}
+      {hasPage2Content && (
+        <Page size={{ width: 300, height: "auto" }} style={styles.page}>
+          {/* Page 2 Header */}
+          <View style={styles.page2Header}>
+            <Text style={styles.page2Title}>{review.project_name}</Text>
+            <Text style={styles.page2Subtitle}>DETAILED ANALYSIS</Text>
+          </View>
+
+          {/* Bodega's Take - Featured at top */}
+          {bodegaTake && (
+            <>
+              <View style={styles.bodegaTakeSection}>
+                <Text style={styles.bodegaTakeTitle}>☆ EASY&apos;S TAKE</Text>
+                <Text style={styles.bodegaTakeText}>{bodegaTake}</Text>
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
+
+          {/* Market Trends - If available */}
+          {marketIntel?.marketTrends && marketIntel.marketTrends.length > 0 && (
+            <>
+              <View style={styles.analystSection}>
+                <Text style={styles.analystTitle}>→ MARKET TRENDS</Text>
+                <View style={styles.marketTrendsList}>
+                  {marketIntel.marketTrends.map((trend, i) => (
+                    <View key={i} style={styles.marketTrendRow}>
+                      <Text style={styles.marketTrendArrow}>→</Text>
+                      <Text style={styles.marketTrendText}>{trend}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.divider} />
+            </>
+          )}
+
+          <View style={styles.divider} />
+
+          {/* Page 2 Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.stars}>********************************</Text>
+            <Text style={styles.footerText}>BODEGA RESEARCH</Text>
+            <Text style={styles.footerText}>{date}</Text>
+            <Text style={styles.stars}>********************************</Text>
+          </View>
+        </Page>
+      )}
     </Document>
   );
 }
