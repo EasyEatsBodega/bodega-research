@@ -5,16 +5,11 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
   Image,
 } from "@react-pdf/renderer";
 import type { Review } from "@/types";
 
-// Register a monospace font (Space Mono would be ideal, using Courier as fallback)
-Font.register({
-  family: "Courier",
-  src: "https://fonts.gstatic.com/s/courierprime/v9/u-450q2lgwslOqpF_6gQ8kELWwZj.woff2",
-});
+// Using built-in Courier font (no registration needed)
 
 // Color helpers
 const getScoreColor = (score: number): string => {

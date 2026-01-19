@@ -4,24 +4,10 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 import type { Review } from "@/types";
 
-// Register fonts
-Font.register({
-  family: "Inter",
-  fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hjp-Ek-_EeA.woff2",
-      fontWeight: 700,
-    },
-  ],
-});
+// Using built-in Helvetica font (no registration needed)
 
 const GOLD = "#F0A202";
 const NAVY = "#202C59";
@@ -40,7 +26,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: "#ffffff",
     padding: 50,
-    fontFamily: "Inter",
+    fontFamily: "Helvetica",
     fontSize: 11,
     color: "#333333",
     lineHeight: 1.6,
