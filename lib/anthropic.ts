@@ -17,7 +17,7 @@ You will receive notes about a project organized into 4 categories:
 3. General App Assessment
 4. Social Sentiment
 
-Based on these notes, you must generate TWO outputs:
+Based on these notes, you must generate THREE outputs:
 
 OUTPUT 1 - PUBLIC RECEIPT (for social sharing):
 A JSON object with the following structure:
@@ -41,6 +41,19 @@ A professional 500-word consulting document that provides a deep-dive analysis. 
 - Investment considerations
 - Recommended next steps
 
+OUTPUT 3 - MARKET INTELLIGENCE:
+Research and provide market data about the sector/space this project operates in:
+{
+  "sector": "DeFi Lending", // The specific Web3 sector (e.g., "DeFi", "NFT Marketplace", "Gaming/GameFi", "Layer 2", "DAO Tooling", "Social", etc.)
+  "tam": "$50B", // Total Addressable Market estimate for this sector
+  "tamGrowthRate": "25% YoY", // Year-over-year growth rate of the market
+  "userGrowthPotential": "High", // One of: "Low", "Medium", "High", "Very High"
+  "keyCompetitors": ["Aave", "Compound", "MakerDAO"], // 3-5 main competitors in this space
+  "marketTrends": ["Trend 1", "Trend 2", "Trend 3"], // 3 key trends affecting this market
+  "marketMaturity": "Growing", // One of: "Emerging", "Growing", "Mature", "Declining"
+  "entryBarrier": "Medium" // One of: "Low", "Medium", "High"
+}
+
 SCORING GUIDELINES:
 - 9-10: Exceptional, best-in-class
 - 7-8: Strong, above average
@@ -51,10 +64,11 @@ SCORING GUIDELINES:
 IMPORTANT: Return ONLY valid JSON in this exact format:
 {
   "publicReceipt": { ... },
-  "privateReport": "..."
+  "privateReport": "...",
+  "marketIntelligence": { ... }
 }
 
-Be objective, data-driven, and honest. Don't sugarcoat issues but also acknowledge genuine strengths.`;
+Be objective, data-driven, and honest. Don't sugarcoat issues but also acknowledge genuine strengths. For market intelligence, use your knowledge of the Web3 ecosystem to provide realistic estimates based on current market conditions.`;
 
 export async function generateAnalysis(
   projectName: string,
@@ -74,7 +88,7 @@ ${rawNotes.aisle3_general}
 AISLE 4 - SOCIAL SENTIMENT:
 ${rawNotes.aisle4_sentiment}
 
-Generate the Public Receipt and Private Report based on these notes.`;
+Generate the Public Receipt, Private Report, and Market Intelligence based on these notes. Identify what sector/market this project operates in and provide relevant market data.`;
 
   const anthropic = getAnthropicClient();
   const message = await anthropic.messages.create({
@@ -108,7 +122,7 @@ Generate the Public Receipt and Private Report based on these notes.`;
     const analysis = JSON.parse(jsonText) as AIAnalysis;
 
     // Validate the response structure
-    if (!analysis.publicReceipt || !analysis.privateReport) {
+    if (!analysis.publicReceipt || !analysis.privateReport || !analysis.marketIntelligence) {
       throw new Error("Invalid response structure");
     }
 
@@ -121,6 +135,17 @@ Generate the Public Receipt and Private Report based on these notes.`;
       !receipt.scores
     ) {
       throw new Error("Invalid publicReceipt structure");
+    }
+
+    // Validate marketIntelligence structure
+    const market = analysis.marketIntelligence;
+    if (
+      !market.sector ||
+      !market.tam ||
+      !market.keyCompetitors ||
+      !Array.isArray(market.keyCompetitors)
+    ) {
+      throw new Error("Invalid marketIntelligence structure");
     }
 
     return analysis;

@@ -33,10 +33,23 @@ export interface RawNotes {
   my_recommendations?: string; // Admin's personal recommendations
 }
 
+// Market Intelligence data
+export interface MarketIntelligence {
+  sector: string; // e.g., "DeFi", "NFT Infrastructure", "Gaming"
+  tam: string; // Total Addressable Market (e.g., "$50B")
+  tamGrowthRate: string; // e.g., "25% YoY"
+  userGrowthPotential: "Low" | "Medium" | "High" | "Very High";
+  keyCompetitors: string[]; // 3-5 competitors
+  marketTrends: string[]; // 3 key trends
+  marketMaturity: "Emerging" | "Growing" | "Mature" | "Declining";
+  entryBarrier: "Low" | "Medium" | "High";
+}
+
 // AI-generated analysis
 export interface AIAnalysis {
   publicReceipt: PublicReceipt;
   privateReport: string;
+  marketIntelligence: MarketIntelligence;
 }
 
 export interface PublicReceipt {

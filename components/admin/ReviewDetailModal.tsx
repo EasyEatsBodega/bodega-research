@@ -10,6 +10,11 @@ import {
   Lock,
   Download,
   User,
+  Globe,
+  Users,
+  Target,
+  Zap,
+  BarChart2,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +31,49 @@ interface ReviewDetailModalProps {
   onClose: () => void;
 }
 
+function getGrowthColor(potential: string) {
+  switch (potential) {
+    case "Very High":
+      return "text-green-400 bg-green-500/20";
+    case "High":
+      return "text-green-500 bg-green-500/10";
+    case "Medium":
+      return "text-bodega-gold bg-bodega-gold/10";
+    case "Low":
+      return "text-bodega-coral bg-bodega-coral/10";
+    default:
+      return "text-gray-400 bg-gray-500/10";
+  }
+}
+
+function getMaturityColor(maturity: string) {
+  switch (maturity) {
+    case "Emerging":
+      return "text-purple-400 bg-purple-500/20";
+    case "Growing":
+      return "text-green-400 bg-green-500/20";
+    case "Mature":
+      return "text-blue-400 bg-blue-500/20";
+    case "Declining":
+      return "text-bodega-coral bg-bodega-coral/20";
+    default:
+      return "text-gray-400 bg-gray-500/10";
+  }
+}
+
+function getBarrierColor(barrier: string) {
+  switch (barrier) {
+    case "Low":
+      return "text-green-400";
+    case "Medium":
+      return "text-bodega-gold";
+    case "High":
+      return "text-bodega-coral";
+    default:
+      return "text-gray-400";
+  }
+}
+
 export function ReviewDetailModal({
   review,
   isOpen,
@@ -35,6 +83,7 @@ export function ReviewDetailModal({
 
   const receipt = review.ai_data?.publicReceipt;
   const privateReport = review.ai_data?.privateReport;
+  const market = review.ai_data?.marketIntelligence;
 
   return (
     <AnimatePresence>
@@ -127,6 +176,99 @@ export function ReviewDetailModal({
                       </div>
                     </div>
                   </div>
+
+                  {/* Market Intelligence Section */}
+                  {market && (
+                    <div className="bg-surface-tertiary rounded-xl p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Globe className="w-5 h-5 text-bodega-gold" />
+                        <h3 className="font-mono font-bold text-lg text-foreground">
+                          Market Intelligence
+                        </h3>
+                        <span className="ml-auto px-3 py-1 bg-bodega-navy rounded-full text-xs font-mono text-bodega-gold">
+                          {market.sector}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        {/* TAM */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Target className="w-4 h-4 text-bodega-gold" />
+                            <span className="text-xs font-mono text-gray-500 uppercase">TAM</span>
+                          </div>
+                          <p className="font-mono font-bold text-2xl text-foreground">{market.tam}</p>
+                          <p className="text-xs font-mono text-green-400">{market.tamGrowthRate}</p>
+                        </div>
+
+                        {/* User Growth Potential */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Users className="w-4 h-4 text-bodega-gold" />
+                            <span className="text-xs font-mono text-gray-500 uppercase">Growth</span>
+                          </div>
+                          <span className={`inline-block px-2 py-1 rounded text-sm font-mono font-bold ${getGrowthColor(market.userGrowthPotential)}`}>
+                            {market.userGrowthPotential}
+                          </span>
+                          <p className="text-xs font-mono text-gray-500 mt-1">User Potential</p>
+                        </div>
+
+                        {/* Market Maturity */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <BarChart2 className="w-4 h-4 text-bodega-gold" />
+                            <span className="text-xs font-mono text-gray-500 uppercase">Stage</span>
+                          </div>
+                          <span className={`inline-block px-2 py-1 rounded text-sm font-mono font-bold ${getMaturityColor(market.marketMaturity)}`}>
+                            {market.marketMaturity}
+                          </span>
+                          <p className="text-xs font-mono text-gray-500 mt-1">Market Phase</p>
+                        </div>
+
+                        {/* Entry Barrier */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Zap className="w-4 h-4 text-bodega-gold" />
+                            <span className="text-xs font-mono text-gray-500 uppercase">Barrier</span>
+                          </div>
+                          <p className={`font-mono font-bold text-lg ${getBarrierColor(market.entryBarrier)}`}>
+                            {market.entryBarrier}
+                          </p>
+                          <p className="text-xs font-mono text-gray-500 mt-1">Entry Difficulty</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Key Competitors */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <h4 className="text-xs font-mono text-gray-500 uppercase mb-3">Key Competitors</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {market.keyCompetitors.map((competitor, i) => (
+                              <span
+                                key={i}
+                                className="px-3 py-1 bg-bodega-navy/50 border border-border rounded-full text-xs font-mono text-gray-300"
+                              >
+                                {competitor}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Market Trends */}
+                        <div className="bg-surface-secondary rounded-lg p-4">
+                          <h4 className="text-xs font-mono text-gray-500 uppercase mb-3">Market Trends</h4>
+                          <ul className="space-y-2">
+                            {market.marketTrends.map((trend, i) => (
+                              <li key={i} className="text-xs font-mono text-gray-300 flex items-start gap-2">
+                                <span className="text-bodega-gold mt-0.5">→</span>
+                                <span>{trend}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Two Column Layout */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
