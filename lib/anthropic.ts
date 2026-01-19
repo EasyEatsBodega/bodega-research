@@ -95,9 +95,17 @@ Generate the Public Receipt and Private Report based on these notes.`;
     throw new Error("No text content in response");
   }
 
-  // Parse the JSON response
+  // Parse the JSON response - handle markdown code blocks
   try {
-    const analysis = JSON.parse(textContent.text) as AIAnalysis;
+    let jsonText = textContent.text.trim();
+
+    // Remove markdown code blocks if present
+    const jsonMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[1].trim();
+    }
+
+    const analysis = JSON.parse(jsonText) as AIAnalysis;
 
     // Validate the response structure
     if (!analysis.publicReceipt || !analysis.privateReport) {
@@ -116,8 +124,9 @@ Generate the Public Receipt and Private Report based on these notes.`;
     }
 
     return analysis;
-  } catch {
+  } catch (parseError) {
     console.error("Failed to parse AI response:", textContent.text);
+    console.error("Parse error:", parseError);
     throw new Error("Failed to parse AI analysis response");
   }
 }
