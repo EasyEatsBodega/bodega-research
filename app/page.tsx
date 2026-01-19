@@ -34,8 +34,21 @@ export default async function HomePage() {
       <Header />
 
       <main className="flex-1">
+        {/* Hero section with bodega background */}
+        <div
+          className="relative min-h-[100vh] bg-cover bg-center bg-no-repeat bg-fixed"
+          style={{ backgroundImage: "url('/images/bodega-background.png')" }}
+        >
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black/30" />
+
+          {/* Content positioned over the counter area */}
+          <div className="relative z-10">
+            <HeroSection />
+          </div>
+        </div>
+
         <div className="container mx-auto px-4">
-          <HeroSection />
           <ProjectGrid reviews={reviews} />
           <WholesaleInquiry />
         </div>

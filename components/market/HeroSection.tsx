@@ -6,12 +6,7 @@ import { Button } from "@/components/ui/Button";
 
 export function HeroSection() {
   return (
-    <section className="py-16 md:py-24 relative gritty-overlay">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-bodega-gold/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-bodega-orange/5 rounded-full blur-3xl" />
-      </div>
+    <section className="py-16 md:py-24 relative min-h-[100vh] flex items-center justify-center">
 
       <div className="max-w-5xl mx-auto text-center relative">
         {/* Neon OPEN Sign */}
@@ -36,7 +31,7 @@ export function HeroSection() {
           transition={{ delay: 0.1 }}
           className="relative inline-block mb-8"
         >
-          <div className="neon-sign py-6 px-10 rounded-lg">
+          <div className="neon-sign py-6 px-10 rounded-lg backdrop-blur-sm bg-black/40">
             <h1 className="font-mono text-4xl md:text-6xl lg:text-7xl font-black tracking-tight">
               <span className="neon-text text-bodega-gold">BODEGA</span>
             </h1>
@@ -92,7 +87,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="window-display p-8 max-w-3xl mx-auto"
+          className="window-display p-8 max-w-3xl mx-auto backdrop-blur-md bg-black/60"
         >
           <div className="grid grid-cols-3 gap-4 md:gap-8">
             <div className="text-center group">
