@@ -35,8 +35,9 @@ export default function AdminLoginPage() {
 
       router.push("/admin");
       router.refresh();
-    } catch {
-      setError("An unexpected error occurred");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
