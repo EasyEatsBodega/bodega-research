@@ -3,25 +3,194 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0A0A0A;
+  --foreground: #FAFAFA;
+  --text-secondary: #A3A3A3;
+
+  /* Brand Colors */
+  --bodega-gold: #F0A202;
+  --bodega-orange: #F18805;
+  --bodega-coral: #D95D39;
+  --bodega-navy: #202C59;
+  --bodega-burgundy: #581F18;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141414;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444444;
+}
+
+/* Selection */
+::selection {
+  background: rgba(240, 162, 2, 0.3);
+  color: #FAFAFA;
+}
+
+/* Receipt styles */
+@layer components {
+  .receipt-paper {
+    background: linear-gradient(
+      to bottom,
+      #f5f5dc 0%,
+      #faf8ef 50%,
+      #f5f5dc 100%
+    );
+    color: #1a1a1a;
+    font-family: var(--font-space-mono), monospace;
+  }
+
+  .receipt-divider {
+    border-top: 2px dashed #ccc;
+    margin: 12px 0;
+  }
+
+  .receipt-tear-edge {
+    position: relative;
+  }
+
+  .receipt-tear-edge::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(
+      135deg,
+      transparent 33.33%,
+      #f5f5dc 33.33%,
+      #f5f5dc 66.67%,
+      transparent 66.67%
+    );
+    background-size: 12px 20px;
+  }
+
+  /* Inventory tag styles */
+  .inventory-tag {
+    @apply relative bg-surface-secondary border border-border rounded-lg overflow-hidden;
+    @apply transition-all duration-300;
+  }
+
+  .inventory-tag:hover {
+    @apply border-bodega-gold shadow-glow-gold;
+    transform: translateY(-2px);
+  }
+
+  .inventory-tag::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--bodega-gold), var(--bodega-orange));
+  }
+
+  /* Price tag sticker */
+  .price-sticker {
+    @apply inline-flex items-center px-3 py-1 rounded-full font-mono text-sm font-bold;
+    background: var(--bodega-gold);
+    color: #0A0A0A;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+    transform: rotate(-2deg);
+  }
+
+  /* POS button styles */
+  .pos-button {
+    @apply relative px-6 py-3 font-mono font-bold uppercase tracking-wider;
+    @apply bg-bodega-gold text-surface-primary rounded-lg;
+    @apply transition-all duration-200;
+    @apply hover:bg-bodega-orange hover:shadow-glow-orange;
+    @apply active:scale-95;
+  }
+
+  .pos-button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* Input styles */
+  .pos-input {
+    @apply w-full px-4 py-3 bg-surface-secondary border border-border rounded-lg;
+    @apply text-foreground font-mono;
+    @apply focus:outline-none focus:border-bodega-gold focus:shadow-glow-gold;
+    @apply transition-all duration-200;
+  }
+
+  .pos-input::placeholder {
+    @apply text-gray-500;
+  }
+
+  /* Score badge */
+  .score-badge {
+    @apply inline-flex items-center justify-center w-12 h-12 rounded-full font-mono font-bold text-lg;
+  }
+
+  .score-badge.high {
+    @apply bg-bodega-gold text-surface-primary;
+  }
+
+  .score-badge.medium {
+    @apply bg-bodega-orange text-surface-primary;
+  }
+
+  .score-badge.low {
+    @apply bg-bodega-burgundy text-white;
+  }
+
+  /* Bodega verified stamp */
+  .verified-stamp {
+    @apply absolute top-4 right-4 -rotate-12;
+    @apply border-4 border-bodega-gold rounded-lg px-4 py-2;
+    @apply font-mono font-bold text-bodega-gold uppercase;
+    @apply opacity-80;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--bodega-gold), var(--bodega-orange));
+  }
+
+  .border-gradient-gold {
+    border: 2px solid transparent;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, var(--bodega-gold), var(--bodega-orange)) border-box;
   }
 }
