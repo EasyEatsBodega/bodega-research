@@ -60,18 +60,29 @@ export async function POST(request: Request) {
       .replace(/-+/g, "-");
     const timestamp = Date.now();
 
-    if (type === "infographic") {
-      pdfBuffer = await renderToBuffer(
-        ReceiptTemplate({ review: review as Review })
+    try {
+      if (type === "infographic") {
+        pdfBuffer = await renderToBuffer(
+          ReceiptTemplate({ review: review as Review })
+        );
+        fileName = `${sanitizedName}-receipt-${timestamp}.pdf`;
+        bucketName = "public-infographics";
+      } else {
+        pdfBuffer = await renderToBuffer(
+          ReportTemplate({ review: review as Review })
+        );
+        fileName = `${sanitizedName}-report-${timestamp}.pdf`;
+        bucketName = "private-reports";
+      }
+    } catch (renderError) {
+      console.error("PDF render error:", renderError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `PDF render failed: ${renderError instanceof Error ? renderError.message : 'Unknown render error'}`
+        },
+        { status: 500 }
       );
-      fileName = `${sanitizedName}-receipt-${timestamp}.pdf`;
-      bucketName = "public-infographics";
-    } else {
-      pdfBuffer = await renderToBuffer(
-        ReportTemplate({ review: review as Review })
-      );
-      fileName = `${sanitizedName}-report-${timestamp}.pdf`;
-      bucketName = "private-reports";
     }
 
     // Upload to Supabase Storage

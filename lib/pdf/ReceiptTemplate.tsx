@@ -364,10 +364,14 @@ export function ReceiptTemplate({ review }: ReceiptTemplateProps) {
 
         <View style={styles.divider} />
 
-        {/* Project Logo */}
-        {review.brand_image_url && (
+        {/* Project Logo - Only render if we have a valid URL */}
+        {review.brand_image_url && review.brand_image_url.startsWith('http') && (
           <View style={styles.logoContainer}>
-            <Image src={review.brand_image_url} style={styles.logo} />
+            <Image
+              src={review.brand_image_url}
+              style={styles.logo}
+              cache={false}
+            />
           </View>
         )}
 

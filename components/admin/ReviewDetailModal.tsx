@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,6 +21,7 @@ import {
   Share2,
   Check,
   Loader2,
+  Camera,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -86,9 +87,11 @@ export function ReviewDetailModal({
   onClose,
 }: ReviewDetailModalProps) {
   const router = useRouter();
+  const contentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isExportingImage, setIsExportingImage] = useState(false);
 
   if (!review) return null;
 
@@ -530,18 +533,16 @@ Powered by Bodega Research
                   {copied ? "Copied!" : "Export Summary"}
                 </Button>
 
-                {/* Generate PDFs Button - show if PDFs don't exist */}
-                {(!review.infographic_url || !review.report_url) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    leftIcon={isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-                    onClick={handleGeneratePDFs}
-                    disabled={isGenerating || !receipt}
-                  >
-                    {isGenerating ? "Generating..." : "Generate PDFs"}
-                  </Button>
-                )}
+                {/* Generate/Regenerate PDFs Button - always show */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
+                  onClick={handleGeneratePDFs}
+                  disabled={isGenerating || !receipt}
+                >
+                  {isGenerating ? "Generating..." : (review.infographic_url ? "Regenerate PDFs" : "Generate PDFs")}
+                </Button>
 
                 {/* Download Buttons - show if PDFs exist */}
                 {review.infographic_url && (
