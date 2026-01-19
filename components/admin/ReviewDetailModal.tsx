@@ -108,8 +108,9 @@ export function ReviewDetailModal({
         body: JSON.stringify({ reviewId: review.id, type: "infographic" }),
       });
 
-      if (!receiptRes.ok) {
-        throw new Error("Failed to generate receipt PDF");
+      const receiptData = await receiptRes.json();
+      if (!receiptRes.ok || !receiptData.success) {
+        throw new Error(receiptData.error || "Failed to generate receipt PDF");
       }
 
       setGenerationStatus("Generating analyst report PDF...");
@@ -121,8 +122,9 @@ export function ReviewDetailModal({
         body: JSON.stringify({ reviewId: review.id, type: "report" }),
       });
 
-      if (!reportRes.ok) {
-        throw new Error("Failed to generate report PDF");
+      const reportData = await reportRes.json();
+      if (!reportRes.ok || !reportData.success) {
+        throw new Error(reportData.error || "Failed to generate report PDF");
       }
 
       setGenerationStatus("PDFs generated successfully!");
@@ -134,8 +136,9 @@ export function ReviewDetailModal({
       }, 1500);
     } catch (error) {
       console.error("PDF generation error:", error);
-      setGenerationStatus("Error generating PDFs");
-      setTimeout(() => setGenerationStatus(null), 3000);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      setGenerationStatus(`Error: ${errorMessage}`);
+      setTimeout(() => setGenerationStatus(null), 5000);
     } finally {
       setIsGenerating(false);
     }
