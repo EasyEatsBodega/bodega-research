@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import html2canvas from "html2canvas-pro";
 import {
   X,
   TrendingUp,
@@ -21,6 +22,7 @@ import {
   Share2,
   Check,
   Loader2,
+  Camera,
 } from "lucide-react";
 import type { Review } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -89,6 +91,8 @@ export function ReviewDetailModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isExportingImage, setIsExportingImage] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   if (!review) return null;
 
@@ -175,6 +179,55 @@ Powered by Bodega Research
     }
   };
 
+  const handleExportImage = async () => {
+    if (!contentRef.current) return;
+
+    setIsExportingImage(true);
+
+    try {
+      const element = contentRef.current;
+
+      // Store original styles
+      const originalOverflow = element.style.overflow;
+      const originalHeight = element.style.height;
+      const originalMaxHeight = element.style.maxHeight;
+
+      // Temporarily expand to full content height
+      element.style.overflow = "visible";
+      element.style.height = "auto";
+      element.style.maxHeight = "none";
+
+      // Wait for layout to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Capture the full content
+      const canvas = await html2canvas(element, {
+        backgroundColor: "#141414",
+        scale: 2, // Higher resolution
+        useCORS: true,
+        allowTaint: true,
+        scrollY: -window.scrollY,
+        windowHeight: element.scrollHeight,
+      });
+
+      // Restore original styles
+      element.style.overflow = originalOverflow;
+      element.style.height = originalHeight;
+      element.style.maxHeight = originalMaxHeight;
+
+      // Download the image
+      const link = document.createElement("a");
+      link.download = `${review.project_name.toLowerCase().replace(/[^a-z0-9]/g, "-")}-review.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (error) {
+      console.error("Image export error:", error);
+      alert("Failed to export image. Please try again.");
+    } finally {
+      setIsExportingImage(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -228,7 +281,7 @@ Powered by Bodega Research
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div ref={contentRef} className="flex-1 overflow-y-auto p-6">
               {receipt ? (
                 <div className="space-y-6">
                   {/* Visual Score Section */}
@@ -522,7 +575,18 @@ Powered by Bodega Research
                 )}
               </div>
               <div className="flex flex-wrap gap-3">
-                {/* Export Button */}
+                {/* Export Image Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={isExportingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                  onClick={handleExportImage}
+                  disabled={!receipt || isExportingImage}
+                >
+                  {isExportingImage ? "Exporting..." : "Export Image"}
+                </Button>
+
+                {/* Export Text Summary Button */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -530,7 +594,7 @@ Powered by Bodega Research
                   onClick={handleExport}
                   disabled={!receipt}
                 >
-                  {copied ? "Copied!" : "Export Summary"}
+                  {copied ? "Copied!" : "Copy Summary"}
                 </Button>
 
                 {/* Generate/Regenerate PDFs Button - always show */}

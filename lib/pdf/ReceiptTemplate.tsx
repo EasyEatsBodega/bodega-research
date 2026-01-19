@@ -358,7 +358,7 @@ export function ReceiptTemplate({ review, logoUrl }: ReceiptTemplateProps) {
 
   return (
     <Document>
-      <Page size={{ width: 300, height: 1400 }} style={styles.page}>
+      <Page size={{ width: 300, height: 1800 }} style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           {logoUrl && (
@@ -524,7 +524,7 @@ export function ReceiptTemplate({ review, logoUrl }: ReceiptTemplateProps) {
 
       {/* PAGE 2 - Analyst Report & Bodega's Take */}
       {hasPage2Content && (
-        <Page size={{ width: 300, height: 600 }} style={styles.page}>
+        <Page size={{ width: 300, height: 800 }} style={styles.page}>
           {/* Page 2 Header */}
           <View style={styles.page2Header}>
             <Text style={styles.page2Title}>{review.project_name}</Text>
