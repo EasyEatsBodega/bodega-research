@@ -246,15 +246,6 @@ export function WholesaleInquiry() {
             </Button>
           </div>
         </motion.form>
-
-        {/* Trust indicators */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 font-mono">
-          <span>48h Response Time</span>
-          <span className="w-1 h-1 bg-gray-600 rounded-full" />
-          <span>Confidential Process</span>
-          <span className="w-1 h-1 bg-gray-600 rounded-full" />
-          <span>No Strings Attached</span>
-        </div>
       </div>
     </section>
   );
