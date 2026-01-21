@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     borderBottom: `2px solid ${GOLD}`,
   },
   logo: {
-    width: 150,
+    width: 200,
   },
   logoText: {
     fontSize: 18,
